@@ -22,6 +22,12 @@ class Map:
         # add agent to the map at (bottom left corner)
         
         self.grid[self.height - 1][0].append('A')
+
+    def get_height(self):
+        return self.height
+    
+    def get_width(self):
+        return self.width
     
     def update_map_info(self, i, j):
         direction = [(0, 1), (0, -1), (1, 0), (-1, 0)]
@@ -34,6 +40,14 @@ class Map:
                         if 0 <= x < self.height and 0 <= y < self.width:
                             if value not in self.grid[x][y]:
                                 self.grid[x][y].append(value)
+
+    def remove_percept(self, cell, percept):
+        i, j = cell
+        self.grid[i][j].remove(percept)
+
+    def add_percept(self, cell, percept):
+        i, j = cell
+        self.grid[i][j].append(percept)
 
 
     def get_percept(self, cell):
