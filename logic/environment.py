@@ -1,6 +1,5 @@
-
-GAME_OVER = ['W', 'P']
-DIRECTION = ['U', 'R', 'D', 'L']
+GAME_OVER = ['W', 'P']  # Wumpus and Pit are game-over conditions
+DIRECTION = ['U', 'R', 'D', 'L']  # Up, Right, Down, Left
 
 class Environment:
     def __init__(self, map, agent):
@@ -9,157 +8,166 @@ class Environment:
         self.game_over = False
 
     def is_game_over(self):
-        # check if the game is over
+        """Check if the game is over based on current cell or agent's health."""
         if self.game_over:
             return True
-        
+
         i, j = self.agent.get_position()
         current_cell = self.map.get_percept((i, j))
-        for value in current_cell:
-            if value in GAME_OVER:
-                return True
-            
-        # if health is less than 0
+
+        # Check if the agent is in a game-over state
+        if any(value in GAME_OVER for value in current_cell):
+            # get value in GAME_OVER that is in current_cell
+
+            threat = ''
+            for value in GAME_OVER:
+                if value in current_cell:
+                    threat = value
+                    break
+            if threat == 'W':
+                print('Agent is eaten by Wumpus')
+            else:
+                print('Agent falls into the pit')
+            return True
+
+        # Check if the agent's health is depleted
         if self.agent.get_health() <= 0:
             return True
-        
+
         return False
     
+    def remove_percept(self, cell, percept):
+        """Remove the specified percept from the given cell."""
+        i, j = cell
+        self.map.remove_percept((i, j), percept)
+        self.agent.remove_percept((i, j), percept)
+    
     def update_score(self, action):
-        SCORE_MAP = {"Forward": -10, "Turn Left": -10, "Turn Right": -10, "Heal": -10, "Grab": -10, "Shoot": -100, "Climb": 10}
+        """Update the agent's score based on the action taken."""
+        SCORE_MAP = {
+            "Forward": -10, "Turn Left": -10, "Turn Right": -10,
+            "Heal": -10, "Grab": -10, "Shoot": -100, "Climb": 10
+        }
 
         if action in SCORE_MAP:
             self.agent.set_score(self.agent.get_score() + SCORE_MAP[action])
 
-    
-    # action = ['Foward', 'Turn Left', 'Turn Right', 'Heal', 'Grab', 'Shoot', 'Climb']
-    
+    def move_agent(self, direction):
+        """Move the agent forward in the given direction."""
+        i, j = self.agent.get_position()
+        di, dj = direction
+        new_i, new_j = i + di, j + dj
+
+        if self.agent.is_valid_move(new_i, new_j):
+            self.agent.set_position((new_i, new_j))
+        else:
+            raise ValueError('Invalid move')
+
+    def turn_agent(self, direction_change):
+        """Turn the agent left or right."""
+        current_direction = DIRECTION.index(self.agent.get_direction())
+        new_direction = (current_direction + direction_change) % 4
+        self.agent.set_direction(DIRECTION[new_direction])
+
+    def heal_agent(self):
+        """Heal the agent if a potion is available."""
+        if self.agent.get_potion() > 0:
+            self.agent.set_potion(self.agent.get_potion() - 1)
+            self.agent.set_health(100)
+            print('Health is restored to 100')
+        else:
+            raise ValueError('No potion to heal')
+
+    def grab_item(self):
+        """Grab gold or potion if present in the current cell."""
+        i, j = self.agent.get_position()
+        current_cell = self.map.get_percept((i, j))
+
+        if 'G' in current_cell:
+            self.remove_percept((i, j), 'G')
+            self.agent.set_score(self.agent.get_score() + 5000)
+            print('Gold is grabbed')
+        elif 'H_P' in current_cell:
+            self.agent.set_potion(self.agent.get_potion() + 1)
+            self.remove_percept((i, j), 'H_P')  # Removing the potion percept
+            self.remove_nearby_percept(i, j, 'G_L')  # Removing the glow percept
+            print('Potion is grabbed')
+        else:
+            raise ValueError('No gold or potion to grab')
+
+    def shoot(self):
+        """Shoot in the current direction to kill the Wumpus."""
+        id = DIRECTION.index(self.agent.get_direction())
+        i, j = self.agent.get_position()
+        di, dj = self.direction_to_delta(DIRECTION[id])
+
+        if self.agent.is_valid_move(i + di, j + dj):
+            if 'W' in self.map.get_percept((i + di, j + dj)):
+                self.remove_percept((i + di, j + dj), 'W')
+                self.agent.add_percept((i + di, j + dj), 'Sc')
+                self.remove_nearby_percept(i + di, j + dj, 'S')  # Removing the stench percept
+                print('Wumpus is killed')
+            else:
+                print('No Wumpus to kill')
+        else:
+            print('Shoot missed')
+
+    def climb(self):
+        """Climb out of the cave if the agent is in the bottom-left corner."""
+        if self.agent.get_position() == (self.map.get_height() - 1, 0):
+            print('Agent has climbed')
+            self.game_over = True
+        else:
+            raise ValueError('Agent cannot climb')
+
     def update_state(self, action):
-
-        i, j = self.agent.get_position()
-        dir = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-
+        """Update the environment state based on the agent's action."""
         if action == "Forward":
-            id = DIRECTION.index(self.agent.get_direction())
-            if self.agent.is_valid_move(i + dir[id][0], j + dir[id][1]):
-                self.agent.set_position((i + dir[id][0], j + dir[id][1]))
-            else:
-                raise ValueError('Invalid move')
-            
+            self.move_agent(self.direction_to_delta(self.agent.get_direction()))
         elif action == "Turn Left":
-            id = DIRECTION.index(self.agent.get_direction())
-            print(id)
-            self.agent.set_direction(DIRECTION[(id - 1 + 4) % 4])
-            print(self.agent.get_direction())
-
+            self.turn_agent(-1)
         elif action == "Turn Right":
-            id = DIRECTION.index(self.agent.get_direction())
-            print(id)
-            self.agent.set_direction(DIRECTION[(id + 1) % 4])
-            print(self.agent.get_direction())
-
+            self.turn_agent(1)
         elif action == "Heal":
-            if self.agent.get_potion() > 0:
-                self.agent.set_potion(self.agent.get_potion() - 1)
-                self.agent.set_health(100)
-                print('Health is restored to 100')
-            else:
-                raise ValueError('No potion to heal')
-
+            self.heal_agent()
         elif action == "Grab":
-            if 'G' in self.map.get_percept((i, j)):
-                self.map.remove_percept((i, j), 'G')
-                self.agent.remove_percept((i, j), 'G')
-                self.agent.set_score(self.agent.get_score() + 5000)
-                print('Gold is grabbed')
-            elif  'H_P' in self.map.get_percept((i, j)):
-                self.agent.set_potion(self.agent.get_potion() + 1)
-                self.agent.remove_percept((i, j), 'H_P')
-                self.map.remove_percept((i, j), 'H_P')
-                # remove G_L percept
-
-                for k in range(len(dir)):
-                    x, y = i + dir[k][0], j + dir[k][1]
-                    if self.agent.is_valid_move(x, y):
-                        if 'G_L' in self.map.get_percept((x, y)):
-                            self.map.remove_percept((x, y), 'G_L')
-                            self.agent.remove_percept((x, y), 'G_L')
-
-                print('Potion is grabbed')
-            else:
-                raise ValueError('No gold or potion to grab')
-
+            self.grab_item()
         elif action == "Shoot":
-            # add scream percept and remove wumpus if wumpus is killed, remove stench percept
-            id = DIRECTION.index(self.agent.get_direction())
-            i, j = self.agent.get_position()
-
-            
-            # remove wumpus in that cell and add scream percept if wumpus is killed to that cell
-            if self.agent.is_valid_move(i + dir[id][0], j + dir[id][1]):
-                if 'W' in self.map.get_percept((i + dir[id][0], j + dir[id][1])):
-                    self.map.remove_percept((i + dir[id][0], j + dir[id][1]), 'W')
-                    self.agent.remove_percept((i + dir[id][0], j + dir[id][1]), 'W')
-
-                    u, v = i + dir[id][0], j + dir[id][1]
-                    self.agent.add_percept((u, v), 'Sc')
-
-                    # remove stench percept from neightbor of (u, v)
-
-                    for k in range(len(dir)):
-                        x, y = u + dir[k][0], v + dir[k][1]
-                        if self.agent.is_valid_move(x, y):
-                            if 'S' in self.map.get_percept((x, y)):
-                                self.map.remove_percept((x, y), 'S')
-                                self.agent.remove_percept((x, y), 'S')
-
-                    print('Wumpus is killed')
-                else:
-                    print('No wumpus to kill')
-
-
+            self.shoot()
         elif action == "Climb":
-            # if the agent is at the bottom left corner, then the agent can climb
-            if self.agent.get_position() == (self.map.get_height() - 1, 0):
-                print('Agent has climbed')
-                self.game_over = True
-            else:
-                raise ValueError('Agent cannot climb')
-        
-        # if current cell is poisonous, then agent health is reduced by 25
-        
-        i, j = self.agent.get_position()
-        if ("P_G" in self.map.get_percept((i, j))):
-            self.agent.set_health(self.agent.get_health() - 25)
-            print('Agent is poisoned')
-            
+            self.climb()
 
+        self.check_for_poison()
         self.update_score(action)
 
-        print('Agent information:')
-        self.agent.print_agent_info()
+    def check_for_poison(self):
+        """Reduce agent's health if the current cell is poisonous."""
+        i, j = self.agent.get_position()
+        if "P_G" in self.map.get_percept((i, j)):
+            self.agent.set_health(self.agent.get_health() - 25)
+            print('Agent is poisoned')
 
+    def remove_nearby_percept(self, i, j, percept):
+        """Remove the specified percept from the neighboring cells."""
+        for direction in DIRECTION:
+            di, dj = self.direction_to_delta(direction)
+            x, y = i + di, j + dj
+            if self.agent.is_valid_move(x, y):
+                if percept in self.map.get_percept((x, y)):
+                    self.remove_percept((x, y), percept)
 
-    
+    def direction_to_delta(self, direction):
+        """Convert a direction to a movement delta."""
+        dir_map = {'U': (-1, 0), 'R': (0, 1), 'D': (1, 0), 'L': (0, -1)}
+        return dir_map[direction]
     
     def simulate(self):
-        # simulate the environment
-        i, j = self.agent.get_position()    
+        """Simulate the environment by continuously updating the agent's state."""
+        i, j = self.agent.get_position()
         self.agent.add_percept((i, j), self.map.get_percept((i, j)))
 
-        print('Agent information:')
-        self.agent.print_agent_info()
-
-        
-        while True:
+        while not self.is_game_over():
             action = self.agent.make_action()
             self.update_state(action)
-            
             i, j = self.agent.get_position()
-
-            percept = self.map.get_percept((i, j))
-
-            self.agent.add_percept((i, j), percept)
-
-            if self.is_game_over():
-                break
+            self.agent.add_percept((i, j), self.map.get_percept((i, j)))
