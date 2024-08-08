@@ -98,6 +98,22 @@ class BaseAgent:
         # return random action
         # input the action to the environment
 
+        # clear the screen
+        print('\n' * 100)
+        print('Choices:')
+        print('1. Forward')
+        print('2. Turn Left')
+        print('3. Turn Right')
+        print('4. Heal')
+        print('5. Shoot')
+        print('6. Climb')
+        print('7. Grab')
+        print()
+        
+        print('Agent info:')
+        self.print_agent_info()
+
+
         action = input('Enter action: ')
         if action == '1':
             return 'Forward'
