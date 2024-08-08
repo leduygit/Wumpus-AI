@@ -39,6 +39,22 @@ class Environment:
     def remove_percept(self, cell, percept):
         """Remove the specified percept from the given cell."""
         i, j = cell
+
+        # check if there is still no more actuator for the percepts
+
+        PERCEPT_TYPE = {"S": "W", "B": "P", "G_L": "H_P", "P_G": "H_P"}
+
+        if percept in PERCEPT_TYPE:
+            actuator = PERCEPT_TYPE[percept]
+            # check if there is still no more actuator for the percepts
+
+            for k in range(4):
+                di, dj = self.direction_to_delta(DIRECTION[k])
+                x, y = i + di, j + dj
+                if self.agent.is_valid_move(x, y):
+                    if actuator in self.map.get_percept((x, y)):
+                        return # do not remove the percept if there is an actuator nearby
+
         self.map.remove_percept((i, j), percept)
         self.agent.remove_percept((i, j), percept)
     

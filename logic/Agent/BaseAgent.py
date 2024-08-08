@@ -83,7 +83,12 @@ class BaseAgent:
         return self.direction
     
     def set_position(self, position):
+        # remove 'A' from the previous position
+        i, j = self.position
+        self.grid[i][j].remove('A')
         self.position = position
+        i, j = self.position
+        self.grid[i][j].append('A')
 
     def set_direction(self, direction):
         self.direction = direction
