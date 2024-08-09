@@ -130,6 +130,7 @@ class Environment:
             if 'W' in self.map.get_percept((i + di, j + dj)):
                 self.remove_percept((i + di, j + dj), 'W')
                 self.agent.add_percept((i + di, j + dj), 'Sc')
+                self.map.set_wumpus_scream(True)
                 self.remove_nearby_percept(i + di, j + dj, 'S')  # Removing the stench percept
                 print('Wumpus is killed')
             else:
@@ -210,6 +211,7 @@ class Environment:
             self.agent.add_percept((i, j), self.map.get_percept((i, j)))
             self.formatter.add_turn(self.map, self.agent, turn_number, action)
             turn_number += 1
+            self.map.set_wumpus_scream(False)
 
 
     def write_to_file(self, filename):

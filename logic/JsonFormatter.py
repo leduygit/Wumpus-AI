@@ -1,8 +1,33 @@
 import json
 
+SENSE = {"S": "Stench", "B": "Breeze", "G_L": "Glow", "W_H": "Whiff"}
+
 class JSonFormatter:
     def __init__(self):
-        self.data = {"moves": []}
+        self.data = []
+
+    def get_log(self, agent, map):
+        # return the log of the agent
+        log = []
+        i, j = agent.get_position()
+
+        # check if wumpus is screaming
+        if (map.get_wumpus_scream()):
+            log.append("Scream")
+        
+
+        # get the percept of the agent of current cell
+        percept = map.get_percept((i, j))
+        for p in percept:
+            if p in SENSE:
+                log.append(SENSE[p])
+        
+        # connect the sense by ','
+        message = "Sense " + ', '.join(log)
+        if len(log) == 0:
+            message = "Sense None"
+        return message
+
 
     def merge_map(self, agent, map):
         # return a new map that merge agent_map and map
@@ -24,20 +49,19 @@ class JSonFormatter:
 
 
     def add_turn(self, map, agent, turn_number, action):
-        turn_key = "turn_" + str(turn_number)
         turn_data = {
-            turn_key: {
-                "map": self.merge_map(agent, map),
-                "position": agent.get_position(),
-                "action": action,
-                "direction": agent.get_direction(),
-                "health": agent.get_health(),
-                "score": agent.get_score(),
-                "potions": agent.get_potion()
-            }
+            "turn": turn_number,
+            "map": self.merge_map(agent, map),
+            "position": agent.get_position(),
+            "action": action,
+            "direction": agent.get_direction(),
+            "health": agent.get_health(),
+            "score": agent.get_score(),
+            "potions": agent.get_potion(),
+            "log": self.get_log(agent, map)
         }
 
-        self.data["moves"].append(turn_data)
+        self.data.append(turn_data)
 
     def write_to_file(self, filename):
         with open(filename, 'w') as f:

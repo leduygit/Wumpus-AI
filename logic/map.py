@@ -12,6 +12,7 @@ class Map:
         self.grid = [[[] for _ in range(len(grid[0]))] for _ in range(len(grid))]
         self.width = len(grid[0])
         self.height = len(grid)
+        self.wumpus_scream = False
 
         # update information about stench, breeze, and gold
         for i in range(self.height):
@@ -19,6 +20,11 @@ class Map:
                 self.grid[i][j].append(grid[i][j])
                 self.update_map_info(i, j)
 
+    def set_wumpus_scream(self, value):
+        self.wumpus_scream = value
+
+    def get_wumpus_scream(self):
+        return self.wumpus_scream
 
     def get_grid(self):
         #return a copy of the grid
