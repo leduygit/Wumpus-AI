@@ -49,15 +49,20 @@ class JSonFormatter:
 
 
     def add_turn(self, map, agent, turn_number, action):
+        current_position = agent.get_position()
+
+        if action == None:
+            action = "None"
+
         turn_data = {
-            "turn": turn_number,
+            "turn": str(turn_number),
             "map": self.merge_map(agent, map),
-            "position": agent.get_position(),
+            "position": [str(current_position[0]), str(current_position[1])],
             "action": action,
             "direction": agent.get_direction(),
-            "health": agent.get_health(),
-            "score": agent.get_score(),
-            "potion": agent.get_potion(),
+            "health": str(agent.get_health()),
+            "score": str(agent.get_score()),
+            "potion": str(agent.get_potion()),
             "log": self.get_log(agent, map)
         }
 
