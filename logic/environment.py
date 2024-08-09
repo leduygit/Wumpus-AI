@@ -63,6 +63,12 @@ class Environment:
     
     def update_score(self, action):
         """Update the agent's score based on the action taken."""
+
+        # if the agent is killed by the wumpus or falls into the pit -10000
+        if self.is_game_over() and not self.game_over:
+            self.agent.set_score(self.agent.get_score() - 10000)
+            return
+
         SCORE_MAP = {
             "Forward": -10, "Turn Left": -10, "Turn Right": -10,
             "Heal": -10, "Grab": -10, "Shoot": -100, "Climb": 10
