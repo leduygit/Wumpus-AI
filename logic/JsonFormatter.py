@@ -57,7 +57,7 @@ class JSonFormatter:
             "direction": agent.get_direction(),
             "health": agent.get_health(),
             "score": agent.get_score(),
-            "potions": agent.get_potion(),
+            "potion": agent.get_potion(),
             "log": self.get_log(agent, map)
         }
 
