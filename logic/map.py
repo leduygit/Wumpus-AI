@@ -19,9 +19,10 @@ class Map:
                 self.grid[i][j].append(grid[i][j])
                 self.update_map_info(i, j)
 
-        # add agent to the map at (bottom left corner)
-        
-        self.grid[self.height - 1][0].append('A')
+
+    def get_grid(self):
+        #return a copy of the grid
+        return [[self.grid[i][j].copy() for j in range(self.width)] for i in range(self.height)]
 
     def get_height(self):
         return self.height

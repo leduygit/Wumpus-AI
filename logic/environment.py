@@ -1,11 +1,14 @@
 GAME_OVER = ['W', 'P']  # Wumpus and Pit are game-over conditions
 DIRECTION = ['U', 'R', 'D', 'L']  # Up, Right, Down, Left
 
+from JsonFormatter import JSonFormatter
+
 class Environment:
     def __init__(self, map, agent):
         self.map = map
         self.agent = agent
         self.game_over = False
+        self.formatter = JSonFormatter()
 
     def is_game_over(self):
         """Check if the game is over based on current cell or agent's health."""
@@ -135,6 +138,11 @@ class Environment:
             self.game_over = True
         else:
             raise ValueError('Agent cannot climb')
+        
+    def mark_visited(self):
+        """Mark the current cell as visited by the agent."""
+        i, j = self.agent.get_position()
+        self.agent.set_visited((i, j))
 
     def update_state(self, action):
         """Update the environment state based on the agent's action."""
@@ -155,6 +163,8 @@ class Environment:
 
         self.check_for_poison()
         self.update_score(action)
+        self.mark_visited()
+
 
     def check_for_poison(self):
         """Reduce agent's health if the current cell is poisonous."""
@@ -181,9 +191,22 @@ class Environment:
         """Simulate the environment by continuously updating the agent's state."""
         i, j = self.agent.get_position()
         self.agent.add_percept((i, j), self.map.get_percept((i, j)))
+        self.mark_visited()
+
+        self.formatter.add_turn(self.map, self.agent, 0, None)
+
+        turn_number = 1
 
         while not self.is_game_over():
             action = self.agent.make_action()
             self.update_state(action)
             i, j = self.agent.get_position()
             self.agent.add_percept((i, j), self.map.get_percept((i, j)))
+            self.formatter.add_turn(self.map, self.agent, turn_number, action)
+            turn_number += 1
+
+
+    def write_to_file(self, filename):
+        """Write the environment state to a JSON file."""
+        self.formatter.write_to_file(filename)
+        

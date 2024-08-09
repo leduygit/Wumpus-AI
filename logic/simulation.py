@@ -26,6 +26,7 @@ def main():
     agent = BaseAgent(4, 4)
     env = Environment(map, agent)
     env.simulate()
+    env.write_to_file('output.json')
 
 if __name__ == '__main__':
     main()

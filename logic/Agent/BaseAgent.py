@@ -18,6 +18,11 @@ class BaseAgent:
         self.health = 100
         self.score = 0
         self.potion = 0
+        self.visited = [[False for _ in range(width)] for _ in range(height)]
+
+        # add agent to the grid
+        i, j = self.position
+        self.grid[i][j].append('A')
 
     def print_agent_info(self):
         print('Position: ', self.position)
@@ -64,6 +69,14 @@ class BaseAgent:
         for p in percept:
             if (p in self.grid[i][j]):
                 self.grid[i][j].remove(p)
+
+    def set_visited(self, position):
+        i, j = position
+        self.visited[i][j] = True
+
+    def get_visited(self, position):
+        i, j = position
+        return self.visited[i][j]
     
 
     def add_percept(self, position, percept):
