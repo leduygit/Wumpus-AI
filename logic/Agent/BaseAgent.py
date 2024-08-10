@@ -11,25 +11,27 @@ ACTION = ['Foward', 'Turn Left', 'Turn Right', 'Heal']
 # H: Heal
 
 def wumpus(x, y):
-    return 16 * x + 4 * y + 1
+    return 10 * x + y
 
 def breeze(x, y):
-    return 16 * x + 4 * y + 2
+    return 101 + 10 * x + y
 
 def stench(x, y):
-    return 16 * x + 4 * y + 3
+    return 202 + 10 * x + y
 
-def agent(x, y, d):
-    # d: 0=N, 1=E, 2=S, 3=W
-    return 16 * x + 4 * y + d + 4
+# def agent(x, y, d):
+#     # d: 0=N, 1=E, 2=S, 3=W
+#     return 303 + 10 * x + y + d
 
 def pit(x, y):
-    return 16 * x + 4 * y + 8
+    return 303 + 10 * x + y
 
 def shoot(d):
     # d: 0=N, 1=E, 2=S, 3=W
     return 64 + d + 1
 
+def safe(x, y):
+    return 404 + 10 * x + y
 
 class BaseAgent:
     def __init__(self, width, height):
@@ -43,6 +45,7 @@ class BaseAgent:
         self.visited = [[False for _ in range(width)] for _ in range(height)]
         self.model = Glucose3()
         self.kb = CNF()
+        self.kb.append([safe(height - 1, 0)])
 
         # add agent to the grid
         i, j = self.position
@@ -124,14 +127,14 @@ class BaseAgent:
         return neighbors
 
     def percept_stench(self, position):
-        self.kb.append([-stench(position)])
+        # self.kb.append([-stench(position[0], position[1])])
         i, j = position
         neighbors = self.get_neighbors(i, j)
         for n in neighbors:
             self.kb.append([wumpus(n[0], n[1])])
 
     def percept_breeze(self, position):
-        self.kb.append([-breeze(position)])
+        # self.kb.append([-breeze(position[0], position[1])])
         i, j = position
         neighbors = self.get_neighbors(i, j)
         for n in neighbors:
@@ -163,43 +166,49 @@ class BaseAgent:
         # return random action
         # input the action to the environment
 
+        print(self.kb.clauses)
         solver = Glucose3()
-        solver.append_formula(self.kb)
-        if self.direction == 'U':
-            if not self.is_valid_move(self.position[0] - 1, self.position[1]):
-                return 'Turn Right'
-            print(solver.solve(assumptions=[wumpus(self.position[0] - 1, self.position[1])]))
-            if solver.solve(assumptions=[wumpus(self.position[0] - 1, self.position[1])]) == False:
-                return 'Shoot'
-            if solver.solve(assumptions=[pit(self.position[0] - 1, self.position[1])]) == False:
-                return 'Forward'
-        elif self.direction == 'R':
-            if not self.is_valid_move(self.position[0], self.position[1] + 1):
-                return 'Turn Right'
-            print(solver.solve(assumptions=[pit(self.position[0], self.position[1] + 1)]))
-            if solver.solve(assumptions=[wumpus(self.position[0], self.position[1] + 1)]) == False:
-                return 'Shoot'
-            if solver.solve(assumptions=[pit(self.position[0], self.position[1] + 1)]) == True:
-                return 'Forward'
-        elif self.direction == 'D':
-            if not self.is_valid_move(self.position[0] + 1, self.position[1]):
-                return 'Turn Right'
-            if solver.solve(assumptions=[wumpus(self.position[0] + 1, self.position[1])]) == False:
-                return 'Shoot'
-            if solver.solve(assumptions=[pit(self.position[0] + 1, self.position[1])]) == False:
-                return 'Forward'
-        elif self.direction == 'L':
-            if not self.is_valid_move(self.position[0], self.position[1] - 1):
-                return 'Turn Right'
-            if solver.solve(assumptions=[wumpus(self.position[0], self.position[1] - 1)]) == False:
-                return 'Shoot'
-            if solver.solve(assumptions=[pit(self.position[0], self.position[1] - 1)]) == False:
-                return 'Forward'
-
+        solver.append_formula(self.kb.clauses)
+        # if self.direction == 'U':
+        #     if not self.is_valid_move(self.position[0] - 1, self.position[1]):
+        #         return 'Turn Right'
+        #     print(solver.solve(assumptions=[wumpus(self.position[0] - 1, self.position[1])]))
+        #     if solver.solve(assumptions=[wumpus(self.position[0] - 1, self.position[1])]) == False:
+        #         return 'Shoot'
+        #     if solver.solve(assumptions=[pit(self.position[0] - 1, self.position[1])]) == False:
+        #         return 'Forward'
+        # elif self.direction == 'R':
+        #     if not self.is_valid_move(self.position[0], self.position[1] + 1):
+        #         return 'Turn Right'
+        #     print(solver.solve(assumptions=[pit(self.position[0], self.position[1] + 1)]))
+        #     if solver.solve(assumptions=[wumpus(self.position[0], self.position[1] + 1)]) == False:
+        #         return 'Shoot'
+        #     if solver.solve(assumptions=[pit(self.position[0], self.position[1] + 1)]) == True:
+        #         return 'Forward'
+        # elif self.direction == 'D':
+        #     if not self.is_valid_move(self.position[0] + 1, self.position[1]):
+        #         return 'Turn Right'
+        #     if solver.solve(assumptions=[wumpus(self.position[0] + 1, self.position[1])]) == False:
+        #         return 'Shoot'
+        #     if solver.solve(assumptions=[pit(self.position[0] + 1, self.position[1])]) == False:
+        #         return 'Forward'
+        # elif self.direction == 'L':
+        #     if not self.is_valid_move(self.position[0], self.position[1] - 1):
+        #         return 'Turn Right'
+        #     if solver.solve(assumptions=[wumpus(self.position[0], self.position[1] - 1)]) == False:
+        #         return 'Shoot'
+        #     if solver.solve(assumptions=[pit(self.position[0], self.position[1] - 1)]) == False:
+        #         return 'Forward'
+        print("current position: ", self.position)
+        for neighbor in self.get_neighbors(self.position[0], self.position[1]):
+            print("neighbor: ", neighbor)
+            print("percept for wumpus: ", solver.solve(assumptions=[-wumpus(neighbor[0], neighbor[1])]))
+            print("percept for pit: ", solver.solve(assumptions=[-pit(neighbor[0], neighbor[1])]))
+            print("percept for safe: ", solver.solve(assumptions=[-safe(neighbor[0], neighbor[1])]))
         solver.delete()
-        return 'Turn Right'
+        # return 'Turn Right'
         # clear the screen
-        print('\n' * 100)
+        # print('\n' * 100)
         print('Choices:')
         print('1. Forward')
         print('2. Turn Left')

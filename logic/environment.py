@@ -203,7 +203,7 @@ class Environment:
         self.formatter.add_turn(self.map, self.agent, 0, None)
 
         turn_number = 1
-        time = 1
+        time = 10
 
         while not self.is_game_over() and time > 0:
             action = self.agent.make_action()
