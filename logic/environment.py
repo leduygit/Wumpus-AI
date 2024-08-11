@@ -13,6 +13,7 @@ class Environment:
     def is_game_over(self):
         """Check if the game is over based on current cell or agent's health."""
         if self.game_over:
+            self.formatter.set_log('Game Over')
             return True
 
         i, j = self.agent.get_position()
