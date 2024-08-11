@@ -31,10 +31,12 @@ class Environment:
                 print('Agent is eaten by Wumpus')
             else:
                 print('Agent falls into the pit')
+            self.formatter.set_log('Game Over')
             return True
 
         # Check if the agent's health is depleted
         if self.agent.get_health() <= 0:
+            self.formatter.set_log('Game Over')
             return True
 
         return False

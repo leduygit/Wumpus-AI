@@ -5,9 +5,18 @@ SENSE = {"S": "Stench", "B": "Breeze", "G_L": "Glow", "W_H": "Whiff"}
 class JSonFormatter:
     def __init__(self):
         self.data = []
+        self.log = ''
+
+    def set_log(self, log):
+        self.log = log
 
     def get_log(self, agent, map):
         # return the log of the agent
+        if self.log != '':
+            return self.log
+
+        # if game is over then return the game over message
+
         log = []
         i, j = agent.get_position()
 
