@@ -168,7 +168,9 @@ class Environment:
         elif action == "Climb":
             self.climb()
 
-        self.check_for_poison()
+        # only forward action can trigger the poison
+        if action == "Forward":
+            self.check_for_poison()
         self.update_score(action)
         self.mark_visited()
 

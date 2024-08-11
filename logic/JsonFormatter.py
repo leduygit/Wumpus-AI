@@ -41,10 +41,12 @@ class JSonFormatter:
                 if not agent.get_visited((i, j)):
                     combined_map[i][j].append('?')
 
-        # add agent to the map
-        agent_position = agent.get_position()
-        combined_map[agent_position[0]][agent_position[1]].append('A')
+        # add door to the map at beginning position
+        i, j = map.get_height() - 1, 0
+        combined_map[i][j].append('D')
+
         return combined_map
+
 
 
 
