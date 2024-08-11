@@ -7,6 +7,7 @@ from gui.sidebar import Sidebar
 from gui.menu import Menu
 from gui.level_page import LevelPage
 from gui.player import Player
+from gui.arrow import Arrow  # Import the Arrow class
 import gui.config as config
 import warnings
 
@@ -19,7 +20,7 @@ class Visualizer:
         self.state = self.load_state(FILENAME)
         self.current_turn_index = 0
         self.playing = False
-        self.frame_count = 0
+        self.frame_count = 0.0
         self.clock = pygame.time.Clock()
         self.update_grid_size()
         self.buttons = {
@@ -28,6 +29,7 @@ class Visualizer:
             "play_stop": pygame.Rect(170, 50, 50, 50),
             "playing": False,
         }
+        self.arrow = None
 
         # Initialize Menu
         self.menu = Menu()
@@ -100,6 +102,11 @@ class Visualizer:
         self.playing = not self.playing
         self.buttons["playing"] = self.playing
 
+    def shoot_arrow(self):
+        direction = self.get_current_state()["direction"]
+        self.arrow_count = 0
+        self.arrow = Arrow(direction, config.GRID_SIZE, self.offset)
+
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -112,16 +119,34 @@ class Visualizer:
         return True
 
     def update_state(self):
-        if self.playing and self.frame_count % STATE_DELAY == 0:
+        if self.playing and int(self.frame_count) % STATE_DELAY == 0:
             self.current_turn_index = (self.current_turn_index + 1) % len(self.state)
             if self.current_turn_index == len(self.state) - 1:
                 self.playing = False
-            self.update_grid_size()  # Update grid size when changing state
+            self.update_grid_size()
+
+        # Handle arrow movement if player is shooting
+        if self.state[self.current_turn_index]["action"] == "Shoot" and not self.arrow:
+            self.shoot_arrow()  # Create arrow if not already created
+
+        if self.arrow and self.arrow_count == STATE_DELAY:
+            # Remove the arrow after it's moved
+            self.arrow = None
+            self.arrow_count = None
 
     def draw(self):
         self.grid.update_grid(self.get_current_map())
         self.grid.draw(self.screen)
-        self.player.draw(self.screen, self.get_current_state(), self.frame_count)
+        self.player.draw(self.screen, self.get_current_state(), int(self.frame_count), is_atacking=self.state[self.current_turn_index]["action"] == "Shoot")
+
+        # Draw the arrow (if it exists)
+        if self.arrow:
+            self.arrow.draw(self.screen, (self.arrow_count),(
+                int(self.state[self.current_turn_index]["position"][1]) * config.GRID_SIZE + self.offset[0],
+                int(self.state[self.current_turn_index]["position"][0]) * config.GRID_SIZE + self.offset[1]
+            ))
+            self.arrow_count += 1
+
         self.sidebar.draw(self.screen, self.get_current_turn())
         pygame.display.flip()
 
