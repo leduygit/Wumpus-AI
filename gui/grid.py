@@ -17,8 +17,8 @@ class Grid:
         self.wumpus_image = self.load_folder_images(config.ENEMY_FOLDER_PATH)[0]
         self.pit_image = self.load_images(config.OBSTACLE_FOLDER_PATH + "/pit.png")
         self.gas_image = self.load_images(config.OBSTACLE_FOLDER_PATH + "/poison_gas.png")
-        self.gold_image = self.load_images(config.OBSTACLE_FOLDER_PATH + "/gold.png")
-        self.healing_potion_image = self.load_images(config.OBSTACLE_FOLDER_PATH + "/healing_potion.png")
+        self.gold_image = self.load_images(config.OBSTACLE_FOLDER_PATH + "/gold.png", ratio=1)
+        self.healing_potion_image = self.load_images(config.OBSTACLE_FOLDER_PATH + "/healing_potion.png", ratio=0.5)
         self.door_image = self.load_images(config.ROAD_FOLDER_PATH + "/door.png")
 
         # self.breeze_image = self.load_images(config.EFFECT_FOLDER_PATH + "/breeze.png")
@@ -26,15 +26,13 @@ class Grid:
         # self.glow_image = self.load_images(config.EFFECT_FOLDER_PATH + "/glow.png")
         # self.stench_image = self.load_images(config.EFFECT_FOLDER_PATH + "/stench.png")
 
-        # self.arrow_image = self.load_folder_images(config.ARROW_FOLDER_PATH)
-
-    def load_images(self, path):
+    def load_images(self, path, ratio = 1):
         try:
             image = self.load_folder_images(path)
-            image = pygame.transform.scale(image[0], (config.GRID_SIZE, config.GRID_SIZE))
+            image = pygame.transform.scale(image[0], (config.GRID_SIZE * ratio, config.GRID_SIZE * ratio))
         except:
             image = pygame.image.load(path)
-            image = pygame.transform.scale(image, (config.GRID_SIZE, config.GRID_SIZE))
+            image = pygame.transform.scale(image, (config.GRID_SIZE * ratio, config.GRID_SIZE * ratio))
         return image
 
     def update_grid(self, grid_data):
@@ -59,22 +57,28 @@ class Grid:
             for col in range(len(self.grid_data[row])):
                 self._draw_cell(screen, row, col)
 
+    def _draw_image(self, screen, image, position):
+        # get image size
+        image_size = image.get_size()
+        position = (position[0] * config.GRID_SIZE + self.offset[0] + (config.GRID_SIZE - image_size[0]) / 2, position[1] * config.GRID_SIZE + (config.GRID_SIZE - image_size[1]) / 2 + self.offset[1])
+        screen.blit(image, position)
+
     def _draw_cell(self, screen, row, col):
 
         self._draw_cell_border(screen, row, col)
-
+        
         if "W" in self.grid_data[row][col]:
-            screen.blit(self.wumpus_image, (col * config.GRID_SIZE + self.offset[0], row * config.GRID_SIZE + self.offset[1]))
+            self._draw_image(screen, self.wumpus_image, (col, row))
         elif "H_P" in self.grid_data[row][col]:
-            screen.blit(self.healing_potion_image, (col * config.GRID_SIZE + self.offset[0], row * config.GRID_SIZE + self.offset[1]))
+            self._draw_image(screen, self.healing_potion_image, (col, row))
         elif "G" in self.grid_data[row][col]:
-            screen.blit(self.gold_image, (col * config.GRID_SIZE + self.offset[0], row * config.GRID_SIZE + self.offset[1]))
+            self._draw_image(screen, self.gold_image, (col, row))
         elif "P" in self.grid_data[row][col]:
-            screen.blit(self.pit_image, (col * config.GRID_SIZE + self.offset[0], row * config.GRID_SIZE + self.offset[1]))
+            self._draw_image(screen, self.pit_image, (col, row))
         elif "P_G" in self.grid_data[row][col]:
-            screen.blit(self.gas_image, (col * config.GRID_SIZE + self.offset[0], row * config.GRID_SIZE + self.offset[1]))
+            self._draw_image(screen, self.gas_image, (col, row))
         elif "A" in self.grid_data[row][col]:
-            screen.blit(self.door_image, (col * config.GRID_SIZE + self.offset[0], row * config.GRID_SIZE + self.offset[1]))
+            self._draw_image(screen, self.door_image, (col, row))
         else:
             cell_value = ""
 
