@@ -137,7 +137,7 @@ class Visualizer:
     def draw(self):
         self.grid.update_grid(self.get_current_map())
         self.grid.draw(self.screen)
-        self.player.draw(self.screen, self.get_current_state(), int(self.frame_count), is_atacking=self.state[self.current_turn_index]["action"] == "Shoot")
+        self.player.draw(self.screen, self.get_current_state(), int(self.frame_count))
 
         # Draw the arrow (if it exists)
         if self.arrow:

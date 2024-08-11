@@ -67,24 +67,24 @@ class Grid:
 
         self._draw_cell_border(screen, row, col)
         
+        if "P" in self.grid_data[row][col]:
+            self._draw_image(screen, self.pit_image, (col, row))
+        if "P_G" in self.grid_data[row][col]:
+            self._draw_image(screen, self.gas_image, (col, row))
+        if "D" in self.grid_data[row][col]:
+            self._draw_image(screen, self.door_image, (col, row))
         if "W" in self.grid_data[row][col]:
             self._draw_image(screen, self.wumpus_image, (col, row))
-        elif "H_P" in self.grid_data[row][col]:
+        if "H_P" in self.grid_data[row][col]:
             self._draw_image(screen, self.healing_potion_image, (col, row))
-        elif "G" in self.grid_data[row][col]:
+        if "G" in self.grid_data[row][col]:
             self._draw_image(screen, self.gold_image, (col, row))
-        elif "P" in self.grid_data[row][col]:
-            self._draw_image(screen, self.pit_image, (col, row))
-        elif "P_G" in self.grid_data[row][col]:
-            self._draw_image(screen, self.gas_image, (col, row))
-        elif "D" in self.grid_data[row][col]:
-            self._draw_image(screen, self.door_image, (col, row))
-        else:
-            cell_value = ""
 
-            for x in self.grid_data[row][col]:
-                if x != "-" and x != "?":
-                    cell_value = f"{cell_value}_{x}" if cell_value else x
+        cell_value = ""
+
+        for x in self.grid_data[row][col]:
+            if x in ["S", "B", "G", "W_H"] and "?" not in self.grid_data[row][col]:
+                cell_value = f"{cell_value}_{x}" if cell_value else x
 
             self._draw_text(screen, cell_value, row, col)
 
