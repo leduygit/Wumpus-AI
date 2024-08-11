@@ -77,7 +77,7 @@ class Grid:
             self._draw_image(screen, self.pit_image, (col, row))
         elif "P_G" in self.grid_data[row][col]:
             self._draw_image(screen, self.gas_image, (col, row))
-        elif "A" in self.grid_data[row][col]:
+        elif "D" in self.grid_data[row][col]:
             self._draw_image(screen, self.door_image, (col, row))
         else:
             cell_value = ""
