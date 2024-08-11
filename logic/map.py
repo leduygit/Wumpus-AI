@@ -17,7 +17,12 @@ class Map:
         # update information about stench, breeze, and gold
         for i in range(self.height):
             for j in range(self.width):
-                self.grid[i][j].append(grid[i][j])
+                percept = grid[i][j]
+                if type(percept) == str:
+                    percept = [percept]
+
+                for p in percept:
+                    self.grid[i][j].append(p)
                 self.update_map_info(i, j)
 
     def set_wumpus_scream(self, value):
@@ -39,14 +44,15 @@ class Map:
     def update_map_info(self, i, j):
         direction = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 
-        for t in TYPE:
-            for key, value in t.items():
-                if key in self.grid[i][j]:
-                    for d in direction:
-                        x, y = i + d[0], j + d[1]
-                        if 0 <= x < self.height and 0 <= y < self.width:
-                            if value not in self.grid[x][y]:
-                                self.grid[x][y].append(value)
+        for p in self.grid[i][j]:
+            for t in TYPE:
+                for key, value in t.items():
+                    if key == p:
+                        for d in direction:
+                            x, y = i + d[0], j + d[1]
+                            if self.is_valid_move(x, y):
+                                if value not in self.grid[x][y]:
+                                    self.grid[x][y].append(value)
 
     def remove_percept(self, cell, percept):
         i, j = cell
