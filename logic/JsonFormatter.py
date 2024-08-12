@@ -5,9 +5,18 @@ SENSE = {"S": "Stench", "B": "Breeze", "G_L": "Glow", "W_H": "Whiff"}
 class JSonFormatter:
     def __init__(self):
         self.data = []
+        self.log = ''
+
+    def set_log(self, log):
+        self.log = log
 
     def get_log(self, agent, map):
         # return the log of the agent
+        if self.log != '':
+            return self.log
+
+        # if game is over then return the game over message
+
         log = []
         i, j = agent.get_position()
 
@@ -41,10 +50,12 @@ class JSonFormatter:
                 if not agent.get_visited((i, j)):
                     combined_map[i][j].append('?')
 
-        # add agent to the map
-        agent_position = agent.get_position()
-        combined_map[agent_position[0]][agent_position[1]].append('A')
+        # add door to the map at beginning position
+        i, j = map.get_height() - 1, 0
+        combined_map[i][j].append('D')
+
         return combined_map
+
 
 
 

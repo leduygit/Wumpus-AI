@@ -37,7 +37,7 @@ class BaseAgent:
     def __init__(self, width, height):
         # bottom left corner
         self.position = (height - 1, 0)
-        self.direction = 'R'
+        self.direction = 'U'
         self.grid = [[[] for _ in range(width)] for _ in range(height)]
         self.health = 100
         self.score = 0

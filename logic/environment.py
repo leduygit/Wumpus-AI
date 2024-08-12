@@ -13,6 +13,7 @@ class Environment:
     def is_game_over(self):
         """Check if the game is over based on current cell or agent's health."""
         if self.game_over:
+            self.formatter.set_log('Game Over')
             return True
 
         i, j = self.agent.get_position()
@@ -31,10 +32,12 @@ class Environment:
                 print('Agent is eaten by Wumpus')
             else:
                 print('Agent falls into the pit')
+            self.formatter.set_log('Game Over')
             return True
 
         # Check if the agent's health is depleted
         if self.agent.get_health() <= 0:
+            self.formatter.set_log('Game Over')
             return True
 
         return False
@@ -168,7 +171,9 @@ class Environment:
         elif action == "Climb":
             self.climb()
 
-        self.check_for_poison()
+        # only forward action can trigger the poison
+        if action == "Forward":
+            self.check_for_poison()
         self.update_score(action)
         self.mark_visited()
 
