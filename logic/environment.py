@@ -41,7 +41,7 @@ class Environment:
             return True
 
         return False
-    
+
     def remove_percept(self, cell, percept):
         """Remove the specified percept from the given cell."""
         i, j = cell
@@ -63,7 +63,7 @@ class Environment:
 
         self.map.remove_percept((i, j), percept)
         self.agent.remove_percept((i, j), percept)
-    
+
     def update_score(self, action):
         """Update the agent's score based on the action taken."""
 
@@ -148,7 +148,7 @@ class Environment:
             self.game_over = True
         else:
             raise ValueError('Agent cannot climb')
-        
+
     def mark_visited(self):
         """Mark the current cell as visited by the agent."""
         i, j = self.agent.get_position()
@@ -198,7 +198,7 @@ class Environment:
         """Convert a direction to a movement delta."""
         dir_map = {'U': (-1, 0), 'R': (0, 1), 'D': (1, 0), 'L': (0, -1)}
         return dir_map[direction]
-    
+
     def simulate(self):
         """Simulate the environment by continuously updating the agent's state."""
         i, j = self.agent.get_position()
@@ -208,8 +208,9 @@ class Environment:
         self.formatter.add_turn(self.map, self.agent, 0, None)
 
         turn_number = 1
+        time = 10
 
-        while not self.is_game_over():
+        while not self.is_game_over() and time > 0:
             action = self.agent.make_action()
             self.update_state(action)
             i, j = self.agent.get_position()
@@ -217,9 +218,9 @@ class Environment:
             self.formatter.add_turn(self.map, self.agent, turn_number, action)
             turn_number += 1
             self.map.set_wumpus_scream(False)
+            time -= 1
 
 
     def write_to_file(self, filename):
         """Write the environment state to a JSON file."""
         self.formatter.write_to_file(filename)
-        
