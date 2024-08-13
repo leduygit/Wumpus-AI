@@ -204,13 +204,10 @@ class Environment:
         i, j = self.agent.get_position()
         self.agent.add_percept((i, j), self.map.get_percept((i, j)))
         self.mark_visited()
-
         self.formatter.add_turn(self.map, self.agent, 0, None)
-
         turn_number = 1
-        time = 10
 
-        while not self.is_game_over() and time > 0:
+        while not self.is_game_over():
             action = self.agent.make_action()
             self.update_state(action)
             i, j = self.agent.get_position()
@@ -218,7 +215,6 @@ class Environment:
             self.formatter.add_turn(self.map, self.agent, turn_number, action)
             turn_number += 1
             self.map.set_wumpus_scream(False)
-            time -= 1
 
 
     def write_to_file(self, filename):

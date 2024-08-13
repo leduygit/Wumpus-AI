@@ -1,51 +1,88 @@
 import random
+import pysat
 from pysat.solvers import Glucose3
 from pysat.formula import CNF
+import pysat.solvers
 
 DIRECTION = ['U', 'R', 'D', 'L']
 
-ACTION = ['Foward', 'Turn Left', 'Turn Right', 'Heal']
+ACTION = ['Foward', 'Turn Left', 'Turn Right', 'Heal', 'Shoot']
 # F: move forward
 # TL: turn left
 # TR: turn right
 # H: Heal
 
+CELL = ['W', 'P', 'P_G', 'H_P', 'B', 'S', 'W_H', 'G_L']
+
+DANGER = ['W', 'P', 'P_G']
+
+EFFECT = ['W_H', 'G_L', "B", 'S']
+
+ACTION_EFFECT = {
+    'W_H': 'P_G',
+    'G_L': 'H_P',
+    'B': 'P',
+    'S': 'W',
+}
+
 def wumpus(x, y):
     return 10 * x + y
 
 def breeze(x, y):
-    return 101 + 10 * x + y
+    return 100 + 10 * x + y
 
 def stench(x, y):
-    return 202 + 10 * x + y
+    return 200 + 10 * x + y
 
 # def agent(x, y, d):
 #     # d: 0=N, 1=E, 2=S, 3=W
 #     return 303 + 10 * x + y + d
 
 def pit(x, y):
-    return 303 + 10 * x + y
+    return 300 + 10 * x + y
 
 def shoot(d):
     # d: 0=N, 1=E, 2=S, 3=W
     return 64 + d + 1
 
-def safe(x, y):
-    return 404 + 10 * x + y
+# def safe(x, y):
+#     return 400 + 10 * x + y
+
+def poison_gas(x, y):
+    return 500 + 10 * x + y
+
+def whiff(x, y):
+    return 600 + 10 * x + y
+
+def healing_potion(x, y):
+    return 700 + 10 * x + y
+
+def glow(x, y):
+    return 800 + 10 * x + y
 
 class BaseAgent:
     def __init__(self, width, height):
         # bottom left corner
         self.position = (height - 1, 0)
-        self.direction = 'U'
+        self.direction = 'R'
         self.grid = [[[] for _ in range(width)] for _ in range(height)]
         self.health = 100
         self.score = 0
         self.potion = 0
         self.visited = [[False for _ in range(width)] for _ in range(height)]
-        self.model = Glucose3()
         self.kb = CNF()
-        self.kb.append([safe(height - 1, 0)])
+        # self.kb.append([safe(height - 1, 0)])
+
+        self.Percept_to_Function = {
+            'W': wumpus,
+            'P': pit,
+            'P_G': poison_gas,
+            'H_P': healing_potion,
+            'B': breeze,
+            'S': stench,
+            'W_H': whiff,
+            'G_L': glow
+        }
 
         # add agent to the grid
         i, j = self.position
@@ -105,17 +142,34 @@ class BaseAgent:
 
     def add_percept(self, position, percept):
         i, j = position
-        print(percept)
+        print("Current Percept: ", percept)
         if (type(percept) == str):
             percept = [percept]
 
         for p in percept:
             if p == 'S':
                 self.percept_stench(position)
-            elif p == 'B':
+            if p == 'B':
                 self.percept_breeze(position)
-            elif (p not in self.grid[i][j]):
+            if p == 'W_H':
+                self.percept_whiff(position)
+            if p == 'G_L':
+                self.percept_glow(position)
+            if (p not in self.grid[i][j]):
                 self.grid[i][j].append(p)
+
+        # update knowledge base
+        for c in CELL:
+            if c not in percept:
+                self.kb.append([-self.Percept_to_Function[c](i, j)])
+
+        # update neighbors
+        neighbors = self.get_neighbors(i, j)
+        for e in EFFECT:
+            if e not in percept:
+                for n in neighbors:
+                    a = ACTION_EFFECT[e]
+                    self.kb.append([-self.Percept_to_Function[a](n[0], n[1])])
 
     def get_neighbors(self, i, j):
         neighbors = []
@@ -130,15 +184,37 @@ class BaseAgent:
         # self.kb.append([-stench(position[0], position[1])])
         i, j = position
         neighbors = self.get_neighbors(i, j)
+        _ = []
         for n in neighbors:
-            self.kb.append([wumpus(n[0], n[1])])
+            _.append(wumpus(n[0], n[1]))
+        if (position == (1, 3)):
+            print("Stench: ", _)
+        self.kb.append(_)
 
     def percept_breeze(self, position):
         # self.kb.append([-breeze(position[0], position[1])])
         i, j = position
         neighbors = self.get_neighbors(i, j)
+        _ = []
         for n in neighbors:
-            self.kb.append([pit(n[0], n[1])])
+            _.append(pit(n[0], n[1]))
+        self.kb.append(_)
+
+    def percept_whiff(self, position):
+        i, j = position
+        neighbors = self.get_neighbors(i, j)
+        _ = []
+        for n in neighbors:
+            _.append(poison_gas(n[0], n[1]))
+        self.kb.append(_)
+
+    def percept_glow(self, position):
+        i, j = position
+        neighbors = self.get_neighbors(i, j)
+        _ = []
+        for n in neighbors:
+            _.append(healing_potion(n[0], n[1]))
+        self.kb.append(_)
 
     def get_position(self):
         return self.position
@@ -162,53 +238,35 @@ class BaseAgent:
             return True
         return False
 
+    def solve_assumption(self, assumption, solver):
+        model = solver.solve(assumptions=assumption)
+        if model:
+            return solver.get_model()
+        return []
+
     def make_action(self):
         # return random action
         # input the action to the environment
 
-        print(self.kb.clauses)
-        solver = Glucose3()
-        solver.append_formula(self.kb.clauses)
-        # if self.direction == 'U':
-        #     if not self.is_valid_move(self.position[0] - 1, self.position[1]):
-        #         return 'Turn Right'
-        #     print(solver.solve(assumptions=[wumpus(self.position[0] - 1, self.position[1])]))
-        #     if solver.solve(assumptions=[wumpus(self.position[0] - 1, self.position[1])]) == False:
-        #         return 'Shoot'
-        #     if solver.solve(assumptions=[pit(self.position[0] - 1, self.position[1])]) == False:
-        #         return 'Forward'
-        # elif self.direction == 'R':
-        #     if not self.is_valid_move(self.position[0], self.position[1] + 1):
-        #         return 'Turn Right'
-        #     print(solver.solve(assumptions=[pit(self.position[0], self.position[1] + 1)]))
-        #     if solver.solve(assumptions=[wumpus(self.position[0], self.position[1] + 1)]) == False:
-        #         return 'Shoot'
-        #     if solver.solve(assumptions=[pit(self.position[0], self.position[1] + 1)]) == True:
-        #         return 'Forward'
-        # elif self.direction == 'D':
-        #     if not self.is_valid_move(self.position[0] + 1, self.position[1]):
-        #         return 'Turn Right'
-        #     if solver.solve(assumptions=[wumpus(self.position[0] + 1, self.position[1])]) == False:
-        #         return 'Shoot'
-        #     if solver.solve(assumptions=[pit(self.position[0] + 1, self.position[1])]) == False:
-        #         return 'Forward'
-        # elif self.direction == 'L':
-        #     if not self.is_valid_move(self.position[0], self.position[1] - 1):
-        #         return 'Turn Right'
-        #     if solver.solve(assumptions=[wumpus(self.position[0], self.position[1] - 1)]) == False:
-        #         return 'Shoot'
-        #     if solver.solve(assumptions=[pit(self.position[0], self.position[1] - 1)]) == False:
-        #         return 'Forward'
+        print(f"Clauses : {self.kb.clauses}")
+        solver = pysat.solvers.Solver(name='glucose3', bootstrap_with=self.kb.clauses)
+        self.kb.clauses.append([1000])
         print("current position: ", self.position)
         for neighbor in self.get_neighbors(self.position[0], self.position[1]):
+            print(self.kb.clauses)
             print("neighbor: ", neighbor)
-            print("percept for wumpus: ", solver.solve(assumptions=[-wumpus(neighbor[0], neighbor[1])]))
-            print("percept for pit: ", solver.solve(assumptions=[-pit(neighbor[0], neighbor[1])]))
-            print("percept for safe: ", solver.solve(assumptions=[-safe(neighbor[0], neighbor[1])]))
+            model_positive = self.solve_assumption([wumpus(neighbor[0], neighbor[1])], solver)
+            model_negative = self.solve_assumption([-wumpus(neighbor[0], neighbor[1])], solver)
+            # print(f"Model: {len(model)}")
+            result = None
+            if len(model_positive) == 0:
+                result = False
+            if len(model_negative) == 0:
+                result = True
+            print("percept for wumpus: ", result)
+        #     print("percept for pit: ", model[pit(neighbor[0], neighbor[1])])
+        #     print("percept for safe: ", model[safe(neighbor[0], neighbor[1])])
         solver.delete()
-        # return 'Turn Right'
-        # clear the screen
-        # print('\n' * 100)
         print('Choices:')
         print('1. Forward')
         print('2. Turn Left')
