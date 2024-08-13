@@ -26,7 +26,9 @@ ACTION_EFFECT = {
 }
 
 def wumpus(x, y):
-    return 10 * x + y
+    if (x == 0 and y == 0):
+        return 6969
+    return 10 * x + y 
 
 def breeze(x, y):
     return 100 + 10 * x + y
@@ -41,9 +43,9 @@ def stench(x, y):
 def pit(x, y):
     return 300 + 10 * x + y
 
-def shoot(d):
-    # d: 0=N, 1=E, 2=S, 3=W
-    return 64 + d + 1
+# def shoot(d):
+#     # d: 0=N, 1=E, 2=S, 3=W
+#     return 64 + d + 1
 
 # def safe(x, y):
 #     return 400 + 10 * x + y
@@ -139,8 +141,25 @@ class BaseAgent:
     def get_visited(self, position):
         i, j = position
         return self.visited[i][j]
+    
+    def simplify(self):
+        # simplify the knowledge base
+        new_kb = CNF()
+        for clause in self.kb:
+            if len(clause) == 1:
+                new_kb.append(clause)
+        
+        for clause in self.kb:
+            if len(clause) > 1:
+                new_clause = []
+                for c in clause:
+                    if -c not in self.kb:
+                        new_clause.append(c)
+        
+        self.kb = new_kb
 
     def add_percept(self, position, percept):
+        self.simplify()
         i, j = position
         print("Current Percept: ", percept)
         if (type(percept) == str):
@@ -157,6 +176,17 @@ class BaseAgent:
                 self.percept_glow(position)
             if (p not in self.grid[i][j]):
                 self.grid[i][j].append(p)
+
+
+
+        if 'Sc' in percept:
+            # add -wumpus(i, j) to the knowledge base
+            
+            if (wumpus(i, j) in self.kb):
+                self.kb.remove(wumpus(i, j))
+
+            self.kb.append([-wumpus(i, j)])
+            return
 
         # update knowledge base
         for c in CELL:
@@ -263,6 +293,9 @@ class BaseAgent:
                 result = False
             if len(model_negative) == 0:
                 result = True
+            # if both are empty, then
+            if len(model_positive) == 0 and len(model_negative) == 0:
+                result = None
             print("percept for wumpus: ", result)
         #     print("percept for pit: ", model[pit(neighbor[0], neighbor[1])])
         #     print("percept for safe: ", model[safe(neighbor[0], neighbor[1])])
