@@ -23,7 +23,7 @@ class LevelPage:
         self.font = pygame.freetype.Font("assets/images/Menu/amongus.ttf", 30)  # Load custom font
         self.dropdown_rect = pygame.Rect(
             WINDOW_SIZE[0] // 2 - 150,
-            WINDOW_SIZE[1] // 3,
+            WINDOW_SIZE[1] / 3 + 15,
             300,
             50
         )  # Centered dropdown
