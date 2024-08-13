@@ -127,7 +127,11 @@ class Player:
             (
                 int(current_position[1]) * config.GRID_SIZE
                 + self.offset[0]
-                + config.GRID_SIZE * 0.15,
-                int(current_position[0]) * config.GRID_SIZE + self.offset[1] - 1,
+                - (config.PLAYER_IMAGE_SIZE[0] - config.GRID_SIZE) / 2
+                ,
+                int(current_position[0]) * config.GRID_SIZE 
+                + self.offset[1] 
+                - (config.PLAYER_IMAGE_SIZE[1] - config.GRID_SIZE) / 2
+                ,
             ),
         )

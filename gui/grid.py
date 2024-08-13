@@ -1,9 +1,7 @@
 import pygame
-import os
-import random
 from gui.config import *
 import gui.config as config
-
+from gui.utils import *
 
 class Grid:
     def __init__(self, grid_data, offset=(0, 0)):
@@ -12,41 +10,22 @@ class Grid:
         self.dynamic_font = pygame.font.SysFont(
             "Roboto", max(12, config.GRID_SIZE // 2)
         )
-        self.road_image = self.load_folder_images(config.ROAD_FOLDER_PATH)
-        self.player_image = self.load_folder_images(config.PLAYER_FOLDER_PATH)[0]
-        self.wumpus_image = self.load_folder_images(config.ENEMY_FOLDER_PATH)[0]
-        self.pit_image = self.load_images(config.OBSTACLE_FOLDER_PATH + "/pit.png")
-        self.gas_image = self.load_images(config.OBSTACLE_FOLDER_PATH + "/poison_gas.png")
-        self.gold_image = self.load_images(config.OBSTACLE_FOLDER_PATH + "/gold.png", ratio=1)
-        self.healing_potion_image = self.load_images(config.OBSTACLE_FOLDER_PATH + "/healing_potion.png", ratio=0.5)
-        self.door_image = self.load_images(config.ROAD_FOLDER_PATH + "/door.png")
+        self.road_image = load_folder_images(config.ROAD_FOLDER_PATH)
+        self.player_image = load_folder_images(config.PLAYER_FOLDER_PATH)[0]
+        self.wumpus_image = load_folder_images(config.ENEMY_FOLDER_PATH)[0]
+        self.pit_image = load_images(config.OBSTACLE_FOLDER_PATH + "/pit.png")
+        self.gas_image = load_images(config.OBSTACLE_FOLDER_PATH + "/poison_gas.png")
+        self.gold_image = load_images(config.OBSTACLE_FOLDER_PATH + "/gold.png", ratio=1)
+        self.healing_potion_image = load_images(config.OBSTACLE_FOLDER_PATH + "/healing_potion.png", ratio=0.5)
+        self.door_image = load_images(config.ROAD_FOLDER_PATH + "/door.png")
 
         # self.breeze_image = self.load_images(config.EFFECT_FOLDER_PATH + "/breeze.png")
         # self.whiff_image = self.load_images(config.EFFECT_FOLDER_PATH + "/whiff.png")
         # self.glow_image = self.load_images(config.EFFECT_FOLDER_PATH + "/glow.png")
         # self.stench_image = self.load_images(config.EFFECT_FOLDER_PATH + "/stench.png")
 
-    def load_images(self, path, ratio = 1):
-        try:
-            image = self.load_folder_images(path)
-            image = pygame.transform.scale(image[0], (config.GRID_SIZE * ratio, config.GRID_SIZE * ratio))
-        except:
-            image = pygame.image.load(path)
-            image = pygame.transform.scale(image, (config.GRID_SIZE * ratio, config.GRID_SIZE * ratio))
-        return image
-
     def update_grid(self, grid_data):
         self.grid_data = grid_data
-
-    def load_folder_images(self, folder):
-        images = []
-        for filename in os.listdir(folder):
-            if filename.endswith(".png"):
-                filename = os.path.join(folder, filename)
-                img = pygame.image.load(filename)
-                img = pygame.transform.scale(img, (config.GRID_SIZE, config.GRID_SIZE))
-                images.append(img)
-        return images
 
     def draw(self, screen):
         screen.fill(WHITE)
