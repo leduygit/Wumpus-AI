@@ -12,7 +12,7 @@ ROAD_FOLDER_PATH = "assets/images/Road"
 PLAYER_FOLDER_PATH = "assets/images/Agent/Player"
 ENEMY_FOLDER_PATH = "assets/images/Agent/Wumpus"
 OBSTACLE_FOLDER_PATH = "assets/images/Obstacle" # pit, Gas, Gold, healing_potion
-EFFECT_FOLDER_PATH = "assets/images/Effect" # Breeze, Whiff, Glow, Stench
+EFFECT_FOLDER_PATH = "assets/images/Percept" # Breeze, Whiff, Glow, Stench
 ARROW_FOLDER_PATH = "assets/images/Arrow"
 
 # window size : 1280 x 800
@@ -25,8 +25,9 @@ WINDOW_HEIGHT = 800
 SIDEBAR_WIDTH = 400
 WINDOW_SIZE = (WINDOW_WIDTH + SIDEBAR_WIDTH, WINDOW_HEIGHT)
 BUTTON_HEIGHT = 40
+PERCEPT_RATIO = 1/3
 # PLAYER_IMAGE_SIZE = (22.5, 30)
-PLAYER_IMAGE_SIZE = (30, 40)
+PLAYER_IMAGE_SIZE = (36, 48) # magic number, dont ask
 FRAME_DELAY = 5
 STATE_DELAY = 60
 

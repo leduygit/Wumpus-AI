@@ -136,7 +136,7 @@ class Visualizer:
 
     def draw(self):
         self.grid.update_grid(self.get_current_map())
-        self.grid.draw(self.screen)
+        self.grid.draw(self.screen, int(self.frame_count))
         self.player.draw(self.screen, self.get_current_state(), int(self.frame_count))
 
         # Draw the arrow (if it exists)
@@ -184,7 +184,7 @@ def visualize():
             result = current_page.handle_events()
             if result == "exit":
                 running = False
-            elif result in ["lv1"]:
+            elif result in ["start"]:
                 level_page = LevelPage(result)
                 current_page = level_page
 

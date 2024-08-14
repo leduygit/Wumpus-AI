@@ -2,6 +2,7 @@ import pygame
 from gui.config import *
 import gui.config as config
 from gui.utils import *
+from gui.animation_object import AnimationObject
 
 class Grid:
     def __init__(self, grid_data, offset=(0, 0)):
@@ -10,24 +11,25 @@ class Grid:
         self.dynamic_font = pygame.font.SysFont(
             "Roboto", max(12, config.GRID_SIZE // 2)
         )
-        self.road_image = load_folder_images(config.ROAD_FOLDER_PATH)
+        self.road_image = load_images(config.ROAD_FOLDER_PATH + "/road.png")
         self.player_image = load_folder_images(config.PLAYER_FOLDER_PATH)[0]
         self.wumpus_image = load_folder_images(config.ENEMY_FOLDER_PATH)[0]
         self.pit_image = load_images(config.OBSTACLE_FOLDER_PATH + "/pit.png")
-        self.gas_image = load_images(config.OBSTACLE_FOLDER_PATH + "/poison_gas.png")
+        self.poison_gas_animation = AnimationObject(config.OBSTACLE_FOLDER_PATH + "/PoisonGas", offset)
         self.gold_image = load_images(config.OBSTACLE_FOLDER_PATH + "/gold.png", ratio=1)
-        self.healing_potion_image = load_images(config.OBSTACLE_FOLDER_PATH + "/healing_potion.png", ratio=0.5)
+        self.healing_potion_animation = AnimationObject(config.OBSTACLE_FOLDER_PATH + "/HealingPotion", offset)
         self.door_image = load_images(config.ROAD_FOLDER_PATH + "/door.png")
 
-        # self.breeze_image = self.load_images(config.EFFECT_FOLDER_PATH + "/breeze.png")
-        # self.whiff_image = self.load_images(config.EFFECT_FOLDER_PATH + "/whiff.png")
-        # self.glow_image = self.load_images(config.EFFECT_FOLDER_PATH + "/glow.png")
-        # self.stench_image = self.load_images(config.EFFECT_FOLDER_PATH + "/stench.png")
+        self.breeze_image = load_images(config.EFFECT_FOLDER_PATH + "/breeze.png", ratio = config.PERCEPT_RATIO)
+        self.whiff_image = load_images(config.EFFECT_FOLDER_PATH + "/whiff.png", ratio = config.PERCEPT_RATIO)
+        self.glow_image = load_images(config.EFFECT_FOLDER_PATH + "/glow.png", ratio = config.PERCEPT_RATIO)
+        self.stench_image = load_images(config.EFFECT_FOLDER_PATH + "/stench.png", ratio = config.PERCEPT_RATIO)
 
     def update_grid(self, grid_data):
         self.grid_data = grid_data
 
-    def draw(self, screen):
+    def draw(self, screen, frame):
+        self.frame = frame
         screen.fill(WHITE)
         self._draw_grid(screen)
 
@@ -46,26 +48,37 @@ class Grid:
 
         self._draw_cell_border(screen, row, col)
         
+        self._draw_image(screen, self.road_image, (col, row))
+        
         if "P" in self.grid_data[row][col]:
             self._draw_image(screen, self.pit_image, (col, row))
         if "P_G" in self.grid_data[row][col]:
-            self._draw_image(screen, self.gas_image, (col, row))
+            # self._draw_image(screen, self.gas_image, (col, row))
+            self.poison_gas_animation.draw(screen, (row, col), self.frame)
         if "D" in self.grid_data[row][col]:
             self._draw_image(screen, self.door_image, (col, row))
         if "W" in self.grid_data[row][col]:
             self._draw_image(screen, self.wumpus_image, (col, row))
         if "H_P" in self.grid_data[row][col]:
-            self._draw_image(screen, self.healing_potion_image, (col, row))
+            # self._draw_image(screen, self.healing_potion_image, (col, row))
+            self.healing_potion_animation.draw(screen, (row, col), self.frame)
         if "G" in self.grid_data[row][col]:
             self._draw_image(screen, self.gold_image, (col, row))
 
         cell_value = ""
 
-        for x in self.grid_data[row][col]:
-            if x in ["S", "B", "G", "W_H"] and "?" not in self.grid_data[row][col]:
-                cell_value = f"{cell_value}_{x}" if cell_value else x
-
-            self._draw_text(screen, cell_value, row, col)
+        if "S" in self.grid_data[row][col]:
+            position = (col * config.GRID_SIZE + self.offset[0], row * config.GRID_SIZE + self.offset[1])
+            screen.blit(self.stench_image, position)
+        if "B" in self.grid_data[row][col]:
+            position = (col * config.GRID_SIZE + self.offset[0] + config.GRID_SIZE * (1 - config.PERCEPT_RATIO), row * config.GRID_SIZE + self.offset[1])
+            screen.blit(self.breeze_image, position)
+        if "G_L" in self.grid_data[row][col]:
+            position = (col * config.GRID_SIZE + self.offset[0], row * config.GRID_SIZE + self.offset[1] + config.GRID_SIZE * (1 - config.PERCEPT_RATIO))
+            screen.blit(self.glow_image, position)
+        if "W_H" in self.grid_data[row][col]:
+            position = (col * config.GRID_SIZE + self.offset[0]  + config.GRID_SIZE * (1 - config.PERCEPT_RATIO), row * config.GRID_SIZE + self.offset[1] + config.GRID_SIZE * (1 - config.PERCEPT_RATIO))
+            screen.blit(self.whiff_image, position)
 
         if "?" in self.grid_data[row][col]:
             self._apply_blur_to_cell(screen, row, col)

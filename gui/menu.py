@@ -5,7 +5,7 @@ from gui.config import WINDOW_SIZE
 class Menu:
     def __init__(self):
         # Define button names
-        self.button_names = ["lv1", "exit"]
+        self.button_names = ["start", "exit"]
 
         # Load images
         self.background = pygame.image.load("assets/images/menu/background.png")
@@ -22,11 +22,22 @@ class Menu:
         self.background = pygame.transform.scale(self.background, WINDOW_SIZE)
 
         # Create button rectangles
-        button_y = WINDOW_SIZE[1] // 2 - 100
-        self.button_rects = [
-            img.get_rect(center=(WINDOW_SIZE[0] // 2, button_y + i * 100))
-            for i, img in enumerate(self.button_images)
-        ]
+        # button_y = WINDOW_SIZE[1] // 2 
+        # self.button_rects = [
+        #     img.get_rect(center=(WINDOW_SIZE[0] // 2, button_y + i * 100))
+        #     for i, img in enumerate(self.button_images)
+        # ]
+        self.start_button = {
+            "image": self.button_images[0],
+            "hover_image": self.button_hover_images[0],
+            "center": (WINDOW_SIZE[0] // 2, WINDOW_SIZE[1] // 2),
+        }
+
+        self.exit_button = {
+            "image": self.button_images[1],
+            "hover_image": self.button_hover_images[1],
+            "center": (WINDOW_SIZE[0] * 8 / 9, WINDOW_SIZE[1] * 10 / 11),
+        }
 
         self.hovered_button = None  # Track which button is hovered
 
@@ -34,11 +45,10 @@ class Menu:
         screen.blit(self.background, (0, 0))
 
         # Draw buttons with hover effect
-        for i, rect in enumerate(self.button_rects):
-            if self.hovered_button == self.button_names[i]:
-                screen.blit(self.button_hover_images[i], rect.topleft)
-            else:
-                screen.blit(self.button_images[i], rect.topleft)
+        start_button_image = self.start_button["hover_image"] if self.hovered_button == "start" else self.start_button["image"]
+        exit_button_image = self.exit_button["hover_image"] if self.hovered_button == "exit" else self.exit_button["image"]
+        screen.blit(start_button_image, self.start_button["image"].get_rect(center=self.start_button["center"]).topleft)
+        screen.blit(exit_button_image, self.exit_button["image"].get_rect(center=self.exit_button["center"]).topleft)
 
         pygame.display.flip()
 
@@ -55,10 +65,13 @@ class Menu:
         # Update hovered button based on mouse position
         if mouse_pos:
             self.hovered_button = None
-            for i, rect in enumerate(self.button_rects):
-                if rect.collidepoint(mouse_pos):
-                    self.hovered_button = self.button_names[i]
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        return self.button_names[i]
+            if self.start_button["image"].get_rect(center=self.start_button["center"]).collidepoint(mouse_pos):
+                self.hovered_button = "start"
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    return "start"
+            elif self.exit_button["image"].get_rect(center=self.exit_button["center"]).collidepoint(mouse_pos):
+                self.hovered_button = "exit"
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    return "exit"
 
         return None
