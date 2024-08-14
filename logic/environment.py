@@ -1,7 +1,7 @@
 GAME_OVER = ['W', 'P']  # Wumpus and Pit are game-over conditions
 DIRECTION = ['U', 'R', 'D', 'L']  # Up, Right, Down, Left
 
-from JsonFormatter import JSonFormatter
+from logic.JsonFormatter import JSonFormatter
 
 class Environment:
     def __init__(self, map, agent):
@@ -13,7 +13,7 @@ class Environment:
     def is_game_over(self):
         """Check if the game is over based on current cell or agent's health."""
         if self.game_over:
-            self.formatter.set_log('Game Over')
+            self.formatter.set_log('Game Over, Agent Has Climbed')
             return True
 
         i, j = self.agent.get_position()
@@ -32,12 +32,12 @@ class Environment:
                 print('Agent is eaten by Wumpus')
             else:
                 print('Agent falls into the pit')
-            self.formatter.set_log('Game Over')
+            self.formatter.set_log('Game Over, Agent Die')
             return True
 
         # Check if the agent's health is depleted
         if self.agent.get_health() <= 0:
-            self.formatter.set_log('Game Over')
+            self.formatter.set_log('Game Over, Agent Die')
             return True
 
         return False
