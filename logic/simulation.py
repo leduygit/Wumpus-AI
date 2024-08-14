@@ -1,6 +1,7 @@
-from map import Map
-from Agent.BaseAgent import BaseAgent
-from environment import Environment
+from logic.map import Map
+from logic.Agent.BaseAgent import BaseAgent
+from logic.environment import Environment
+import logic.CONFIG as CONFIG
 
 # the map is represented as a grid
 # each cell is seperated by a dot
@@ -32,17 +33,25 @@ def load_map(file):
     return grid
 
 
-def main():
-    grid = load_map('map.txt')
+def simulate():
+
+    for file in CONFIG.FILE_NAME:
+
+        input_file = CONFIG.INPUT_PATH + file + '.txt'
+        output_file = CONFIG.OUTPUT_PATH + file + '.json'
+
+        grid = load_map(input_file)
+        height = len(grid)
+        width = len(grid[0])
+
+        map = Map(grid)
+        agent = BaseAgent(width, height)
+
+        env = Environment(map, agent)
+
+        env.simulate()
+
+        env.write_to_file(output_file)
+
     
-    map = Map(grid)
-    map.print_map()
 
-    size = len(grid)
-    agent = BaseAgent(size, size)
-    env = Environment(map, agent)
-    env.simulate()
-    env.write_to_file('output.json')
-
-if __name__ == '__main__':
-    main()
