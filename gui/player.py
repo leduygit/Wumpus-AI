@@ -115,6 +115,8 @@ class Player:
         return self.player_images[player_name][direction][frame % self.number_of_moving_frames]
 
     def draw(self, screen, current_state, frame_count):
+        if "climb" in str(current_state["log"]).lower():
+            return
         current_position = current_state["position"]
         direction = direction_map[current_state["direction"]]
         is_atacking = current_state["action"] == "Shoot"
