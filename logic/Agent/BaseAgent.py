@@ -161,6 +161,8 @@ class BaseAgent:
             if e not in percept:
                 for n in neighbors:
                     a = ACTION_EFFECT[e]
+                    if [self.PERCEPT_TO_FUNCTION[a](n[0], n[1])] in self.kb.clauses:
+                        self.kb.clauses.remove([self.PERCEPT_TO_FUNCTION[a](n[0], n[1])])
                     self.kb.append([-self.PERCEPT_TO_FUNCTION[a](n[0], n[1])])
 
         self.simplify()
