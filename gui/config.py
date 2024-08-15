@@ -29,7 +29,7 @@ PERCEPT_RATIO = 1/3
 # PLAYER_IMAGE_SIZE = (22.5, 30)
 PLAYER_IMAGE_SIZE = (36, 48) # magic number, dont ask
 FRAME_DELAY = 5
-STATE_DELAY = 60
+STATE_DELAY = 50
 
 # Initialize Pygame
 pygame.init()

@@ -13,6 +13,7 @@ class Sidebar:
         self.on_previous = on_previous  # Callback for previous button
         self.on_next = on_next  # Callback for next button
         self.on_play_stop = on_play_stop  # Callback for play/stop button
+        self.reached_end = False
 
     def load_button_images(self):
         self.button_images = {
@@ -30,12 +31,15 @@ class Sidebar:
                 self.button_images[key], (30, 30)  # Smaller, more subtle buttons
             )
 
-    def draw(self, screen, current_turn):
+    def draw(self, screen, current_turn, move_log=False):
         sidebar_bg_color = (50, 50, 50)  # Darker gray for a modern look
         sidebar_x = WINDOW_SIZE[0] - SIDEBAR_WIDTH + self.offset[0]
         sidebar_y = self.offset[1]
         sidebar_width = SIDEBAR_WIDTH
         sidebar_height = WINDOW_SIZE[1]
+
+        if move_log:
+            self.current_log_index = current_turn - 14
 
         # Draw sidebar background
         pygame.draw.rect(
@@ -92,7 +96,7 @@ class Sidebar:
             )
 
     def draw_scrollable_log(self, screen, sidebar_x, log_area_top, sidebar_width, current_turn):
-        log_area_rect = pygame.Rect(sidebar_x + 10, log_area_top, sidebar_width - 20, 300)
+        log_area_rect = pygame.Rect(sidebar_x + 10, log_area_top, sidebar_width - 20, 320)
         pygame.draw.rect(screen, (40, 40, 40), log_area_rect)
 
         font = pygame.font.Font(None, 20)
@@ -117,7 +121,7 @@ class Sidebar:
             log_text = font.render(log_entry, True, (200, 200, 200))
             if "Over" in log_entry:
                 log_text = font.render(log_entry, True, (255, 0, 0))
-            screen.blit(log_text, (log_area_rect.x + 10, log_area_rect.y + i * 20))
+            screen.blit(log_text, (log_area_rect.x + 10, log_area_rect.y + i * 20 + 10))
 
         # Draw a border around the log area
         pygame.draw.rect(screen, (100, 100, 100), log_area_rect, 2)
@@ -126,7 +130,7 @@ class Sidebar:
         button_margin = 10
         button_x = log_area_rect.right - 35  # Adjusted to fit next to the log area
         button_y_up = log_area_top - 40  # Above the log area
-        button_y_down = log_area_top + 300 + button_margin  # Below the log area
+        button_y_down = log_area_top + 320 + button_margin  # Below the log area
 
         self.scroll_button_up_rect = pygame.Rect(button_x - 25, button_y_up, 30, 30)
         self.scroll_button_down_rect = pygame.Rect(button_x - 25, button_y_down, 30, 30)

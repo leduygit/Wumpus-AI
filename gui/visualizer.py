@@ -30,7 +30,6 @@ class Visualizer:
             "playing": False,
         }
         self.arrow = None
-
         # Initialize Menu
         self.menu = Menu()
         self.menu_active = True
@@ -53,7 +52,6 @@ class Visualizer:
         current_map = self.get_current_map()
         self.map_rows = len(current_map)
         self.map_cols = len(current_map[0])
-
         # Calculate new grid size
         new_grid_size = min(
             WINDOW_HEIGHT // self.map_rows, WINDOW_WIDTH // self.map_cols
@@ -76,6 +74,7 @@ class Visualizer:
             int(config.PLAYER_IMAGE_SIZE[0] * ratio),
             int(config.PLAYER_IMAGE_SIZE[1] * ratio),
         )
+
 
     def load_state(self, filename):
         with open(filename, "r") as f:
@@ -146,8 +145,11 @@ class Visualizer:
                 int(self.state[self.current_turn_index]["position"][0]) * config.GRID_SIZE + self.offset[1]
             ))
             self.arrow_count += 1
+            if self.arrow_count == STATE_DELAY:
+                self.arrow = None
 
-        self.sidebar.draw(self.screen, self.get_current_turn())
+        self.sidebar.draw(self.screen, self.get_current_turn(), move_log=self.current_turn_index >= 14)
+        self.move_log = False
         pygame.display.flip()
 
     def run(self):
