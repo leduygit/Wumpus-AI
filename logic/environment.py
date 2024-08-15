@@ -140,6 +140,7 @@ class Environment:
                 print('No Wumpus to kill')
         else:
             print('Shoot missed')
+            self.agent.add_percept((i + di, j + dj), 'Sc') # indicate that there's no wumpus
 
     def climb(self):
         """Climb out of the cave if the agent is in the bottom-left corner."""
