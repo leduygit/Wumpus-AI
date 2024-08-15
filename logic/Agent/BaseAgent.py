@@ -165,7 +165,7 @@ class BaseAgent:
 
         self.simplify()
     
-    
+
     def remove_percept(self, position, percept):
         i, j = position
         if isinstance(percept, str):
@@ -191,8 +191,12 @@ class BaseAgent:
     
     def add_percept_to_kb(self, position, percept):
         i, j = position
+        if percept in self.PERCEPT_TO_FUNCTION.keys():
+            self.kb.append([self.PERCEPT_TO_FUNCTION[percept](i, j)])
+            
         if percept not in PERCEPT_TO_LITERAL:
             return
+        
         
         literal = PERCEPT_TO_LITERAL[percept]
         neighbors = self.get_neighbors(i, j)
