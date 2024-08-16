@@ -47,6 +47,7 @@ class BaseAgent:
         self.potion = 0
         self.visited = [[False for _ in range(width)] for _ in range(height)]
         self.kb = CNF()
+        self.shooted = [[False for _ in range(width)] for _ in range(height)]
 
         self.PERCEPT_TO_FUNCTION = {
             'W': wumpus,
@@ -117,6 +118,14 @@ class BaseAgent:
     def set_direction(self, direction):
         self.direction = direction
 
+    def get_shooted(self, position):
+        i, j = position
+        return self.shooted[i][j]
+    
+    def set_shooted(self, position):
+        i, j = position
+        self.shooted[i][j] = True
+
     def simplify(self):
         new_kb = CNF()
         for clause in self.kb.clauses:
@@ -147,10 +156,18 @@ class BaseAgent:
             if p not in self.grid[i][j]:
                 self.grid[i][j].append(p)
 
+        if 'No-Sc' in percept:
+            if [wumpus(i, j)] in self.kb.clauses:
+                self.kb.clauses.remove([wumpus(i, j)])
+            self.kb.append([-wumpus(i, j)])
+            self.simplify()
+            return
+
         if 'Sc' in percept:            
             if [wumpus(i, j)] in self.kb.clauses:
                 self.kb.clauses.remove([wumpus(i, j)])
             self.kb.append([-wumpus(i, j)])
+            self.kb.append([-pit(i, j)])
             self.simplify()
             return
         

@@ -130,6 +130,7 @@ class Environment:
         di, dj = self.direction_to_delta(DIRECTION[id])
 
         if self.agent.is_valid_move(i + di, j + dj):
+            self.agent.set_shooted((i + di, j + dj))
             if 'W' in self.map.get_percept((i + di, j + dj)):
                 self.remove_percept((i + di, j + dj), 'W')
                 self.agent.add_percept((i + di, j + dj), 'Sc')
@@ -138,7 +139,7 @@ class Environment:
                 print('Wumpus is killed')
             else:
                 print('No Wumpus to kill')
-                self.agent.add_percept((i + di, j + dj), 'Sc')  # indicate that there's no wumpus
+                self.agent.add_percept((i + di, j + dj), 'No-Sc')  # indicate that there's no wumpus
 
     def climb(self):
         """Climb out of the cave if the agent is in the bottom-left corner."""

@@ -20,6 +20,8 @@ class DummyAgent(BaseAgent):
         is_pit = self.solve_assumption([pit(i, j)])
         is_poison_gas = self.solve_assumption([poison_gas(i, j)])
 
+
+
         if is_wumpus == True:
             return False
         
@@ -31,9 +33,10 @@ class DummyAgent(BaseAgent):
 
         if is_poison_gas == True and self.get_health() > 25:
             return True
-
-        if is_wumpus == False and is_pit == False:
+        
+        if is_pit == False and is_wumpus == False:
             return True
+        
         
         return None
 
@@ -50,10 +53,6 @@ class DummyAgent(BaseAgent):
 
 
         queue = deque([(self.get_position(), self.get_direction(), [])])
-
-        # queue with sequence of actions
-
-        # action = 'Foward', 'Turn Left', 'Turn Right'
 
         action = ['Forward', 'Turn Left', 'Turn Right']
 
@@ -95,7 +94,7 @@ class DummyAgent(BaseAgent):
 
         return []
     
-    def bfs_to_start(self):
+    def bfs_to_goal(self, goal):
         visited = [[[False for _ in range(self.width)] for _ in range(self.height)] for _ in range(4)]
 
         queue = deque([(self.get_position(), self.get_direction(), [])])
@@ -107,7 +106,10 @@ class DummyAgent(BaseAgent):
 
             i, j = position
 
-            if i == self.height - 1 and j == 0:
+            if not self.is_safe((i, j)):
+                continue
+
+            if (i, j) == goal:
                 return action_sequence
 
             if visited[i][j][DIRECTION.index(direction)]:
@@ -138,7 +140,7 @@ class DummyAgent(BaseAgent):
         if self.get_position() == (self.height - 1, 0):
             return "Climb"
         
-        self.action_sequence = self.bfs_to_start()
+        self.action_sequence = self.bfs_to_goal((self.height - 1, 0))
 
         
         if self.action_sequence:
@@ -204,14 +206,26 @@ class DummyAgent(BaseAgent):
             index = DIRECTION.index(direction)
             u, v = i + FORWARD[index][0], j + FORWARD[index][1]
 
-            if self.safe_cells[u][v] != True:
+            if self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
                 return "Shoot"
             else:
                 return "Turn Left"
             
-        # no action to take then return to the start
+        # find cell with stench and go there
             
+        for i in range(self.height):
+            for j in range(self.width):
+                if 'S' in self.grid[i][j]:
+                    self.action_sequence = self.bfs_to_goal((i, j))
+                    if self.action_sequence:
+                        action = self.action_sequence.pop(0)
+                        return action
+        
+        # go back to start
+                    
         return self.return_to_start()
+                    
+        
             
         
             
