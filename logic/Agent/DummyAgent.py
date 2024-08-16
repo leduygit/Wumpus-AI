@@ -9,6 +9,7 @@ class DummyAgent(BaseAgent):
     def __init__(self, width, height):
         super().__init__(width, height)
         self.safe_cells = [[None for _ in range(width)] for _ in range(height)] 
+        print(width, height)
         self.width = width
         self.height = height
         
@@ -71,10 +72,11 @@ class DummyAgent(BaseAgent):
                 print(self.visited[i][j])
                 return action_sequence
             
-            if visited[i][j][DIRECTION.index(direction)]:
+            print("Position: ", i, j)
+            if visited[DIRECTION.index(direction)][i][j]:
                 continue
 
-            visited[i][j][DIRECTION.index(direction)] = True
+            visited[DIRECTION.index(direction)][i][j] = True
 
             for a in action:
                 direction_index = DIRECTION.index(direction)
@@ -112,10 +114,10 @@ class DummyAgent(BaseAgent):
             if (i, j) == goal:
                 return action_sequence
 
-            if visited[i][j][DIRECTION.index(direction)]:
+            if visited[DIRECTION.index(direction)][i][j]:
                 continue
 
-            visited[i][j][DIRECTION.index(direction)] = True
+            visited[DIRECTION.index(direction)][i][j] = True
 
             for a in action:
                 direction_index = DIRECTION.index(direction)
