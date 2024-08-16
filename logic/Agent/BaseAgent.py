@@ -40,7 +40,7 @@ PERCEPT_TO_LITERAL = {
 class BaseAgent:
     def __init__(self, width, height):
         self.position = (height - 1, 0)
-        self.direction = 'R'
+        self.direction = 'U'
         self.grid = [[[] for _ in range(width)] for _ in range(height)]
         self.health = 100
         self.score = 0
@@ -102,6 +102,10 @@ class BaseAgent:
 
     def get_direction(self):
         return self.direction
+    
+    def get_percept(self, position):
+        i, j = position
+        return self.grid[i][j]
 
     def set_position(self, position):
         i, j = self.position
@@ -129,6 +133,7 @@ class BaseAgent:
                     new_kb.append(new_clause)
         
         self.kb = new_kb
+
 
     def add_percept(self, position, percept):
         i, j = position
@@ -219,8 +224,10 @@ class BaseAgent:
             raise ValueError('Invalid assumption')
         
         if not positive_model:
+            solver.delete()
             return False
         if not negative_model:
+            solver.delete()
             return True
 
         solver.delete()
