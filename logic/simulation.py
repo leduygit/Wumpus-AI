@@ -1,5 +1,6 @@
 from logic.map import Map
 from logic.Agent.BaseAgent import BaseAgent
+from logic.Agent.DummyAgent import DummyAgent
 from logic.environment import Environment
 import logic.CONFIG as CONFIG
 
@@ -45,7 +46,7 @@ def simulate():
         width = len(grid[0])
 
         map = Map(grid)
-        agent = BaseAgent(width, height)
+        agent = DummyAgent(width, height)
 
         env = Environment(map, agent)
 
