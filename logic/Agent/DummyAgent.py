@@ -118,8 +118,8 @@ class DummyAgent(BaseAgent):
         if 'H_P' in current_percept:
             return "Grab"
 
-        # if there is no None inn safe cell --> go back to the start
-        if not any(None in row for row in self.safe_cells):
+        # if there is no None inn safe cell and no unvisited cell --> go back to the start
+        if not any(None in row for row in self.safe_cells) and not any(False in row for row in self.visited):
             return self.return_to_start()
 
 
