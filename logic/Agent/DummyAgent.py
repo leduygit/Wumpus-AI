@@ -27,10 +27,10 @@ class DummyAgent(BaseAgent):
         if is_pit == True:
             return False
         
-        if is_poison_gas == True and self.get_health() <= 25:
+        if is_poison_gas == True and self.get_health() <= 50:
             return False
 
-        if is_poison_gas == True and self.get_health() > 25:
+        if is_poison_gas == True and self.get_health() > 50:
             return True
         
         if is_pit == False and is_wumpus == False:
@@ -112,6 +112,9 @@ class DummyAgent(BaseAgent):
 
         current_percept = self.get_percept(self.get_position())
 
+        if self.get_health() < 100 and self.get_potion() > 0:
+            return "Heal"
+
         if 'G' in current_percept:
             return "Grab"
         
@@ -151,6 +154,7 @@ class DummyAgent(BaseAgent):
                 return "Turn Left"
             
         # find cell with stench and go there
+        print("Health: ", self.get_health())
             
         
         stench_list = []
