@@ -12,7 +12,7 @@ class JSonFormatter:
 
     def get_log(self, agent, map):
         # return the log of the agent
-        if self.log != '' and self.log != 'Agent Heal':
+        if self.log != '' and self.log != 'Agent Heal' and self.log != 'Grab Gold':
             return self.log
 
         # if game is over then return the game over message
@@ -38,6 +38,9 @@ class JSonFormatter:
 
         if self.log == 'Agent Heal':
             message = 'Agent Heal' + ', ' + message
+
+        if self.log == 'Grab Gold':
+            message = 'Grab Gold' + ', ' + message
 
         self.log = ''
         return message

@@ -50,6 +50,8 @@ class Grid:
         
         self._draw_image(screen, self.road_image, (col, row))
         
+        if "G" in self.grid_data[row][col]:
+            self._draw_image(screen, self.gold_image, (col, row))
         if "P" in self.grid_data[row][col]:
             self._draw_image(screen, self.pit_image, (col, row))
         if "P_G" in self.grid_data[row][col]:
@@ -62,8 +64,6 @@ class Grid:
         if "H_P" in self.grid_data[row][col]:
             # self._draw_image(screen, self.healing_potion_image, (col, row))
             self.healing_potion_animation.draw(screen, (row, col), self.frame)
-        if "G" in self.grid_data[row][col]:
-            self._draw_image(screen, self.gold_image, (col, row))
 
         cell_value = ""
 
