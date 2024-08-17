@@ -111,10 +111,6 @@ class DummyAgent(BaseAgent):
             return action
 
     def make_action(self):
-        self.add_safe_cell()
-
-        if self.get_health() < 100 and self.get_potion() > 0:
-            return "Heal"
 
         current_percept = self.get_percept(self.get_position())
 
@@ -127,6 +123,8 @@ class DummyAgent(BaseAgent):
         if 'H_P' in current_percept:
             return "Grab"
 
+        self.add_safe_cell()
+        
         if 'S' in current_percept:
             direction = self.get_direction()
             i, j = self.get_position()
@@ -157,27 +155,12 @@ class DummyAgent(BaseAgent):
         if self.action_sequence:
             action = self.action_sequence.pop(0)
             return action
+
         
-            
-            
         # find cell with stench and go there
         print("Health: ", self.get_health())
             
-        
-        stench_list = []
-        for i in range(self.height):
-            for j in range(self.width):
-                if 'S' in self.grid[i][j]:
-                    stench_list.append((i, j))
                     
-
-        if stench_list:
-            self.action_sequence = self.bfs_to_goal(stench_list)
-            if self.action_sequence:
-                action = self.action_sequence.pop(0)
-                return action
-                    
-        
         # go back to start
         return self.return_to_start()
                     
