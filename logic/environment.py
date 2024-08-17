@@ -102,7 +102,7 @@ class Environment:
         if self.agent.get_potion() > 0:
             self.agent.set_potion(self.agent.get_potion() - 1)
             self.agent.set_health(self.agent.get_health() + 25)
-            print('Health is restored to 100')
+            self.formatter.set_log('Agent Heal')
         else:
             raise ValueError('No potion to heal')
 
