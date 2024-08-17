@@ -60,6 +60,7 @@ class Environment:
                 if self.agent.is_valid_move(x, y):
                     if actuator in self.map.get_percept((x, y)):
                         return # do not remove the percept if there is an actuator nearby
+            
 
         self.map.remove_percept((i, j), percept)
         self.agent.remove_percept((i, j), percept)
@@ -209,6 +210,7 @@ class Environment:
         turn_number = 1
 
         while not self.is_game_over():
+            self.map.print_map()
             action = self.agent.make_action()
             self.update_state(action)
             i, j = self.agent.get_position()
