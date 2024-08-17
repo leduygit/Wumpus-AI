@@ -107,6 +107,9 @@ class DummyAgent(BaseAgent):
 
     def make_action(self):
 
+        if self.get_health() < 100 and self.get_potion() > 0:
+            return "Heal"
+
         current_percept = self.get_percept(self.get_position())
 
         if self.get_health() < 100 and self.get_potion() > 0:
@@ -130,8 +133,6 @@ class DummyAgent(BaseAgent):
         if self.action_sequence:
             action = self.action_sequence.pop(0)
             return action
-
-        
         
             
         if 'S' in current_percept:

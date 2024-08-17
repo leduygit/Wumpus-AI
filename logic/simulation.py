@@ -40,7 +40,7 @@ def simulate():
 
         input_file = CONFIG.INPUT_PATH + file + '.txt'
         output_file = CONFIG.OUTPUT_PATH + file + '.json'
-
+        print(f"Simulating {file}...")
         grid = load_map(input_file)
         height = len(grid)
         width = len(grid[0])

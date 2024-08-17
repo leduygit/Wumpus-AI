@@ -20,7 +20,7 @@ class Map:
         for i in range(self.height):
             for j in range(self.width):
                 percept = grid[i][j]
-                # print(i, j)
+                print(i, j)
                 if type(percept) == str:
                     percept = [percept]
 
