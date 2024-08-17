@@ -9,7 +9,7 @@ class DummyAgent(BaseAgent):
     def __init__(self, width, height):
         super().__init__(width, height)
         self.safe_cells = [[None for _ in range(width)] for _ in range(height)] 
-        print(width, height)
+        # print(width, height)
         self.width = width
         self.height = height
         
@@ -68,8 +68,8 @@ class DummyAgent(BaseAgent):
                 continue
 
             if self.safe_cells[i][j] == True and not self.visited[i][j]:
-                print("Safe Cell: ", i, j)
-                print(self.visited[i][j])
+                # print("Safe Cell: ", i, j)
+                # print(self.visited[i][j])
                 return action_sequence
             
             print("Position: ", i, j)
@@ -108,10 +108,10 @@ class DummyAgent(BaseAgent):
 
             i, j = position
 
-            if not self.is_safe((i, j)):
+            if not self.is_safe((i, j)) and (i, j) != self.get_position():
                 continue
 
-            if (i, j) == goal:
+            if (i, j) in goal:
                 return action_sequence
 
             if visited[DIRECTION.index(direction)][i][j]:
@@ -142,7 +142,7 @@ class DummyAgent(BaseAgent):
         if self.get_position() == (self.height - 1, 0):
             return "Climb"
         
-        self.action_sequence = self.bfs_to_goal((self.height - 1, 0))
+        self.action_sequence = self.bfs_to_goal([(self.height - 1, 0)])
 
         
         if self.action_sequence:
@@ -168,14 +168,14 @@ class DummyAgent(BaseAgent):
 
         self.action_sequence = self.bfs_to_nearest_safe()
 
-        print("Action Sequence: ", self.action_sequence)
+        # print("Action Sequence: ", self.action_sequence)
 
-        print("Current Position: ", self.get_position())
-        print("Current Direction: ", self.get_direction())
-        for i in range(self.height):
-            for j in range(self.width):
-                print(self.safe_cells[i][j], end=' ')
-            print()
+        # print("Current Position: ", self.get_position())
+        # print("Current Direction: ", self.get_direction())
+        # for i in range(self.height):
+        #     for j in range(self.width):
+        #         print(self.safe_cells[i][j], end=' ')
+        #     print()
 
         if self.action_sequence:
             action = self.action_sequence.pop(0)
@@ -184,11 +184,11 @@ class DummyAgent(BaseAgent):
 
         # print safe cells
 
-        print("Visited:")
-        for i in range(self.height):
-            for j in range(self.width):
-                print(self.visited[i][j], end=' ')
-            print()
+        # print("Visited:")
+        # for i in range(self.height):
+        #     for j in range(self.width):
+        #         print(self.visited[i][j], end=' ')
+        #     print()
 
         print("Grid:")
         for i in range(self.height):
@@ -197,34 +197,47 @@ class DummyAgent(BaseAgent):
             print()
 
         
-        if self.get_health() < 50:
+        if self.get_health() < 50 and self.get_potion() > 0:
             return "Heal"
         
             
         if 'S' in current_percept:
             direction = self.get_direction()
             i, j = self.get_position()
+            print("DR: ", direction)
 
             index = DIRECTION.index(direction)
             u, v = i + FORWARD[index][0], j + FORWARD[index][1]
 
-            if self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
+
+            if self.is_valid_move(u, v) and self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
+                print("Shoot")
+                print("Position: ", u, v)
                 return "Shoot"
             else:
                 return "Turn Left"
             
         # find cell with stench and go there
             
+        print("No action")
+        
+        stench_list = []
         for i in range(self.height):
             for j in range(self.width):
                 if 'S' in self.grid[i][j]:
-                    self.action_sequence = self.bfs_to_goal((i, j))
-                    if self.action_sequence:
-                        action = self.action_sequence.pop(0)
-                        return action
+                    stench_list.append((i, j))
+                    
+
+        if stench_list:
+            print("Stench List: ", stench_list)
+            self.action_sequence = self.bfs_to_goal(stench_list)
+            if self.action_sequence:
+                action = self.action_sequence.pop(0)
+                return action
+                    
         
         # go back to start
-                    
+        print("Return to start")
         return self.return_to_start()
                     
         
