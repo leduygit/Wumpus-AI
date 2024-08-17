@@ -9,7 +9,6 @@ class DummyAgent(BaseAgent):
     def __init__(self, width, height):
         super().__init__(width, height)
         self.safe_cells = [[None for _ in range(width)] for _ in range(height)] 
-        print(width, height)
         self.width = width
         self.height = height
         
@@ -20,7 +19,6 @@ class DummyAgent(BaseAgent):
         is_wumpus = self.solve_assumption([wumpus(i, j)])
         is_pit = self.solve_assumption([pit(i, j)])
         is_poison_gas = self.solve_assumption([poison_gas(i, j)])
-
 
 
         if is_wumpus == True:
@@ -49,53 +47,10 @@ class DummyAgent(BaseAgent):
                 
 
     def bfs_to_nearest_safe(self):
-        visited = [[[False for _ in range(self.width)] for _ in range(self.height)] for _ in range(4)]
+        safe_cells = [(i, j) for i in range(self.height) for j in range(self.width) if self.safe_cells[i][j] and not self.visited[i][j]]
 
+        return self.bfs_to_goal(safe_cells)
 
-
-        queue = deque([(self.get_position(), self.get_direction(), [])])
-
-        action = ['Forward', 'Turn Left', 'Turn Right']
-
-
-
-        while queue:
-            position, direction, action_sequence = queue.popleft()
-
-            i, j = position
-
-            if self.safe_cells[i][j] != True:
-                continue
-
-            if self.safe_cells[i][j] == True and not self.visited[i][j]:
-                print("Safe Cell: ", i, j)
-                print(self.visited[i][j])
-                return action_sequence
-            
-            print("Position: ", i, j)
-            if visited[DIRECTION.index(direction)][i][j]:
-                continue
-
-            visited[DIRECTION.index(direction)][i][j] = True
-
-            for a in action:
-                direction_index = DIRECTION.index(direction)
-
-                if a == 'Forward':
-                    new_position = (i + FORWARD[direction_index][0], j + FORWARD[direction_index][1])
-                    if self.is_valid_move(new_position[0], new_position[1]):
-                        queue.append((new_position, direction, action_sequence + ['Forward']))
-                
-                elif a == 'Turn Left':
-                    new_direction = DIRECTION[(direction_index - 1) + 4 % 4]
-                    queue.append((position, new_direction, action_sequence + ['Turn Left']))
-
-                elif a == 'Turn Right':
-                    new_direction = DIRECTION[(direction_index + 1) % 4]
-                    queue.append((position, new_direction, action_sequence + ['Turn Right']))
-
-        return []
-    
     def bfs_to_goal(self, goal):
         visited = [[[False for _ in range(self.width)] for _ in range(self.height)] for _ in range(4)]
 
@@ -108,10 +63,10 @@ class DummyAgent(BaseAgent):
 
             i, j = position
 
-            if not self.is_safe((i, j)):
+            if not self.is_safe((i, j)) and (i, j) != self.get_position():
                 continue
 
-            if (i, j) == goal:
+            if (i, j) in goal:
                 return action_sequence
 
             if visited[DIRECTION.index(direction)][i][j]:
@@ -126,7 +81,7 @@ class DummyAgent(BaseAgent):
                     new_position = (i + FORWARD[direction_index][0], j + FORWARD[direction_index][1])
                     if self.is_valid_move(new_position[0], new_position[1]):
                         queue.append((new_position, direction, action_sequence + ['Forward']))
-                
+
                 elif a == 'Turn Left':
                     new_direction = DIRECTION[(direction_index - 1) + 4 % 4]
                     queue.append((position, new_direction, action_sequence + ['Turn Left']))
@@ -138,11 +93,12 @@ class DummyAgent(BaseAgent):
         return []
 
 
+
     def return_to_start(self):
         if self.get_position() == (self.height - 1, 0):
             return "Climb"
         
-        self.action_sequence = self.bfs_to_goal((self.height - 1, 0))
+        self.action_sequence = self.bfs_to_goal([(self.height - 1, 0)])
 
         
         if self.action_sequence:
@@ -168,36 +124,12 @@ class DummyAgent(BaseAgent):
 
         self.action_sequence = self.bfs_to_nearest_safe()
 
-        print("Action Sequence: ", self.action_sequence)
-
-        print("Current Position: ", self.get_position())
-        print("Current Direction: ", self.get_direction())
-        for i in range(self.height):
-            for j in range(self.width):
-                print(self.safe_cells[i][j], end=' ')
-            print()
-
         if self.action_sequence:
             action = self.action_sequence.pop(0)
             return action
-        
-
-        # print safe cells
-
-        print("Visited:")
-        for i in range(self.height):
-            for j in range(self.width):
-                print(self.visited[i][j], end=' ')
-            print()
-
-        print("Grid:")
-        for i in range(self.height):
-            for j in range(self.width):
-                print(self.grid[i][j], end=' ')
-            print()
 
         
-        if self.get_health() < 50:
+        if self.get_health() < 50 and self.get_potion() > 0:
             return "Heal"
         
             
@@ -208,23 +140,35 @@ class DummyAgent(BaseAgent):
             index = DIRECTION.index(direction)
             u, v = i + FORWARD[index][0], j + FORWARD[index][1]
 
-            if self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
+
+            if self.is_valid_move(u, v) and self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
                 return "Shoot"
             else:
+                # check if on the right not safe cell and not shooted
+                index = (index + 1) % 4
+                u, v = i + FORWARD[index][0], j + FORWARD[index][1]
+                if self.is_valid_move(u, v) and self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
+                    return "Turn Right"
                 return "Turn Left"
             
         # find cell with stench and go there
             
+        
+        stench_list = []
         for i in range(self.height):
             for j in range(self.width):
                 if 'S' in self.grid[i][j]:
-                    self.action_sequence = self.bfs_to_goal((i, j))
-                    if self.action_sequence:
-                        action = self.action_sequence.pop(0)
-                        return action
+                    stench_list.append((i, j))
+                    
+
+        if stench_list:
+            self.action_sequence = self.bfs_to_goal(stench_list)
+            if self.action_sequence:
+                action = self.action_sequence.pop(0)
+                return action
+                    
         
         # go back to start
-                    
         return self.return_to_start()
                     
         
