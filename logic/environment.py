@@ -115,6 +115,7 @@ class Environment:
             self.remove_percept((i, j), 'G')
             self.agent.set_score(self.agent.get_score() + 5000)
             print('Gold is grabbed')
+            self.formatter.set_log('Grab Gold')
         elif 'H_P' in current_cell:
             self.agent.set_potion(self.agent.get_potion() + 1)
             self.remove_percept((i, j), 'H_P')  # Removing the potion percept
