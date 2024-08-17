@@ -119,6 +119,8 @@ class Sidebar:
 
         for i, log_entry in enumerate(visible_logs):
             log_text = font.render(log_entry, True, (200, 200, 200))
+            if "Heal" in log_entry:
+                log_text = font.render(log_entry, True, (0, 255, 0))
             if "Over" in log_entry:
                 log_text = font.render(log_entry, True, (255, 0, 0))
             screen.blit(log_text, (log_area_rect.x + 10, log_area_rect.y + i * 20 + 10))
