@@ -49,53 +49,12 @@ class DummyAgent(BaseAgent):
                 
 
     def bfs_to_nearest_safe(self):
-        visited = [[[False for _ in range(self.width)] for _ in range(self.height)] for _ in range(4)]
+        # Find all safe cells as potential goals
+        safe_cells = [(i, j) for i in range(self.height) for j in range(self.width) if self.safe_cells[i][j] and not self.visited[i][j]]
 
+        # Use the bfs_to_goal function with the safe cells as the goal set
+        return self.bfs_to_goal(safe_cells)
 
-
-        queue = deque([(self.get_position(), self.get_direction(), [])])
-
-        action = ['Forward', 'Turn Left', 'Turn Right']
-
-
-
-        while queue:
-            position, direction, action_sequence = queue.popleft()
-
-            i, j = position
-
-            if self.safe_cells[i][j] != True:
-                continue
-
-            if self.safe_cells[i][j] == True and not self.visited[i][j]:
-                # print("Safe Cell: ", i, j)
-                # print(self.visited[i][j])
-                return action_sequence
-            
-            print("Position: ", i, j)
-            if visited[DIRECTION.index(direction)][i][j]:
-                continue
-
-            visited[DIRECTION.index(direction)][i][j] = True
-
-            for a in action:
-                direction_index = DIRECTION.index(direction)
-
-                if a == 'Forward':
-                    new_position = (i + FORWARD[direction_index][0], j + FORWARD[direction_index][1])
-                    if self.is_valid_move(new_position[0], new_position[1]):
-                        queue.append((new_position, direction, action_sequence + ['Forward']))
-                
-                elif a == 'Turn Left':
-                    new_direction = DIRECTION[(direction_index - 1) + 4 % 4]
-                    queue.append((position, new_direction, action_sequence + ['Turn Left']))
-
-                elif a == 'Turn Right':
-                    new_direction = DIRECTION[(direction_index + 1) % 4]
-                    queue.append((position, new_direction, action_sequence + ['Turn Right']))
-
-        return []
-    
     def bfs_to_goal(self, goal):
         visited = [[[False for _ in range(self.width)] for _ in range(self.height)] for _ in range(4)]
 
@@ -126,7 +85,7 @@ class DummyAgent(BaseAgent):
                     new_position = (i + FORWARD[direction_index][0], j + FORWARD[direction_index][1])
                     if self.is_valid_move(new_position[0], new_position[1]):
                         queue.append((new_position, direction, action_sequence + ['Forward']))
-                
+
                 elif a == 'Turn Left':
                     new_direction = DIRECTION[(direction_index - 1) + 4 % 4]
                     queue.append((position, new_direction, action_sequence + ['Turn Left']))
@@ -136,6 +95,7 @@ class DummyAgent(BaseAgent):
                     queue.append((position, new_direction, action_sequence + ['Turn Right']))
 
         return []
+
 
 
     def return_to_start(self):
@@ -190,11 +150,11 @@ class DummyAgent(BaseAgent):
         #         print(self.visited[i][j], end=' ')
         #     print()
 
-        print("Grid:")
-        for i in range(self.height):
-            for j in range(self.width):
-                print(self.grid[i][j], end=' ')
-            print()
+        # print("Grid:")
+        # for i in range(self.height):
+        #     for j in range(self.width):
+        #         print(self.grid[i][j], end=' ')
+        #     print()
 
         
         if self.get_health() < 50 and self.get_potion() > 0:
@@ -204,17 +164,19 @@ class DummyAgent(BaseAgent):
         if 'S' in current_percept:
             direction = self.get_direction()
             i, j = self.get_position()
-            print("DR: ", direction)
 
             index = DIRECTION.index(direction)
             u, v = i + FORWARD[index][0], j + FORWARD[index][1]
 
 
             if self.is_valid_move(u, v) and self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
-                print("Shoot")
-                print("Position: ", u, v)
                 return "Shoot"
             else:
+                # check if on the right not safe cell and not shooted
+                index = (index + 1) % 4
+                u, v = i + FORWARD[index][0], j + FORWARD[index][1]
+                if self.is_valid_move(u, v) and self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
+                    return "Turn Right"
                 return "Turn Left"
             
         # find cell with stench and go there
