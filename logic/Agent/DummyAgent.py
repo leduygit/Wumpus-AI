@@ -9,7 +9,6 @@ class DummyAgent(BaseAgent):
     def __init__(self, width, height):
         super().__init__(width, height)
         self.safe_cells = [[None for _ in range(width)] for _ in range(height)] 
-        # print(width, height)
         self.width = width
         self.height = height
         
@@ -20,7 +19,6 @@ class DummyAgent(BaseAgent):
         is_wumpus = self.solve_assumption([wumpus(i, j)])
         is_pit = self.solve_assumption([pit(i, j)])
         is_poison_gas = self.solve_assumption([poison_gas(i, j)])
-
 
 
         if is_wumpus == True:
@@ -49,10 +47,8 @@ class DummyAgent(BaseAgent):
                 
 
     def bfs_to_nearest_safe(self):
-        # Find all safe cells as potential goals
         safe_cells = [(i, j) for i in range(self.height) for j in range(self.width) if self.safe_cells[i][j] and not self.visited[i][j]]
 
-        # Use the bfs_to_goal function with the safe cells as the goal set
         return self.bfs_to_goal(safe_cells)
 
     def bfs_to_goal(self, goal):
@@ -128,33 +124,9 @@ class DummyAgent(BaseAgent):
 
         self.action_sequence = self.bfs_to_nearest_safe()
 
-        # print("Action Sequence: ", self.action_sequence)
-
-        # print("Current Position: ", self.get_position())
-        # print("Current Direction: ", self.get_direction())
-        # for i in range(self.height):
-        #     for j in range(self.width):
-        #         print(self.safe_cells[i][j], end=' ')
-        #     print()
-
         if self.action_sequence:
             action = self.action_sequence.pop(0)
             return action
-        
-
-        # print safe cells
-
-        # print("Visited:")
-        # for i in range(self.height):
-        #     for j in range(self.width):
-        #         print(self.visited[i][j], end=' ')
-        #     print()
-
-        # print("Grid:")
-        # for i in range(self.height):
-        #     for j in range(self.width):
-        #         print(self.grid[i][j], end=' ')
-        #     print()
 
         
         if self.get_health() < 50 and self.get_potion() > 0:
@@ -181,7 +153,6 @@ class DummyAgent(BaseAgent):
             
         # find cell with stench and go there
             
-        print("No action")
         
         stench_list = []
         for i in range(self.height):
@@ -191,7 +162,6 @@ class DummyAgent(BaseAgent):
                     
 
         if stench_list:
-            print("Stench List: ", stench_list)
             self.action_sequence = self.bfs_to_goal(stench_list)
             if self.action_sequence:
                 action = self.action_sequence.pop(0)
@@ -199,7 +169,6 @@ class DummyAgent(BaseAgent):
                     
         
         # go back to start
-        print("Return to start")
         return self.return_to_start()
                     
         
