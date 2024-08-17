@@ -12,7 +12,7 @@ class JSonFormatter:
 
     def get_log(self, agent, map):
         # return the log of the agent
-        if self.log != '':
+        if self.log != '' and self.log != 'Agent Heal':
             return self.log
 
         # if game is over then return the game over message
@@ -35,6 +35,11 @@ class JSonFormatter:
         message = "Sense " + ', '.join(log)
         if len(log) == 0:
             message = "Sense None"
+
+        if self.log == 'Agent Heal':
+            message = 'Agent Heal' + ', ' + message
+
+        self.log = ''
         return message
 
 
@@ -55,7 +60,6 @@ class JSonFormatter:
         combined_map[i][j].append('D')
 
         return combined_map
-
 
 
 
