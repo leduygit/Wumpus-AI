@@ -130,7 +130,7 @@ class Environment:
         di, dj = self.direction_to_delta(DIRECTION[id])
 
         if self.agent.is_valid_move(i + di, j + dj):
-            self.agent.set_shooted((i + di, j + dj))
+            # self.agent.set_shooted((i + di, j + dj))
             if 'W' in self.map.get_percept((i + di, j + dj)):
                 self.remove_percept((i + di, j + dj), 'W')
                 self.agent.add_percept((i + di, j + dj), 'Sc')

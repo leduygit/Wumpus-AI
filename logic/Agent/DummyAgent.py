@@ -44,6 +44,11 @@ class DummyAgent(BaseAgent):
             for j in range(self.width):
                 if not self.safe_cells[i][j]:
                     self.safe_cells[i][j] = self.is_safe((i, j))
+
+        for i in range(self.height):
+            for j in range(self.width):
+                is_wumpus = self.solve_assumption([wumpus(i, j)])
+                self.is_wumpus[i][j] = is_wumpus
                 
 
     def bfs_to_nearest_safe(self):
@@ -106,6 +111,7 @@ class DummyAgent(BaseAgent):
             return action
 
     def make_action(self):
+        self.add_safe_cell()
 
         current_percept = self.get_percept(self.get_position())
 
@@ -118,12 +124,30 @@ class DummyAgent(BaseAgent):
         if 'H_P' in current_percept:
             return "Grab"
 
+        if 'S' in current_percept:
+            direction = self.get_direction()
+            i, j = self.get_position()
+
+            index = DIRECTION.index(direction)
+            u, v = i + FORWARD[index][0], j + FORWARD[index][1]
+
+
+            if self.is_valid_move(u, v) and self.is_wumpus[u][v] != False:
+                return "Shoot"
+            else:
+                # check if on the right not safe cell and not shooted
+                index = (index + 1) % 4
+                u, v = i + FORWARD[index][0], j + FORWARD[index][1]
+                if self.is_valid_move(u, v) and self.is_wumpus[u][v] != False:
+                    return "Turn Right"
+                return "Turn Left"
+            
+        
         # if there is no None inn safe cell and no unvisited cell --> go back to the start
         if not any(None in row for row in self.safe_cells) and not any(False in row for row in self.visited):
             return self.return_to_start()
 
 
-        self.add_safe_cell()
 
         self.action_sequence = self.bfs_to_nearest_safe()
 
@@ -134,23 +158,6 @@ class DummyAgent(BaseAgent):
         
         
             
-        if 'S' in current_percept:
-            direction = self.get_direction()
-            i, j = self.get_position()
-
-            index = DIRECTION.index(direction)
-            u, v = i + FORWARD[index][0], j + FORWARD[index][1]
-
-
-            if self.is_valid_move(u, v) and self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
-                return "Shoot"
-            else:
-                # check if on the right not safe cell and not shooted
-                index = (index + 1) % 4
-                u, v = i + FORWARD[index][0], j + FORWARD[index][1]
-                if self.is_valid_move(u, v) and self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
-                    return "Turn Right"
-                return "Turn Left"
             
         # find cell with stench and go there
         print("Health: ", self.get_health())
