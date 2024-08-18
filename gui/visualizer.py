@@ -30,6 +30,7 @@ class Visualizer:
             "playing": False,
         }
         self.arrow = None
+        self.shoot_arrow_check = [False] * len(self.state)
         # Initialize Menu
         self.menu = Menu()
         self.menu_active = True
@@ -125,11 +126,18 @@ class Visualizer:
             self.update_grid_size()
 
         # Handle arrow movement if player is shooting
-        if self.state[self.current_turn_index]["action"] == "Shoot" and not self.arrow:
+        if self.state[self.current_turn_index]["action"] == "Shoot" and not self.arrow and not self.shoot_arrow_check[self.current_turn_index]:
+            self.shoot_arrow_check[self.current_turn_index] = True
             self.shoot_arrow()  # Create arrow if not already created
+        else:
+            if self.current_turn_index > 0:
+                self.shoot_arrow_check[self.current_turn_index - 1] = False
+            if self.current_turn_index < len(self.state) - 1:
+                self.shoot_arrow_check[self.current_turn_index + 1] = False
 
-        if self.arrow and self.arrow_count == STATE_DELAY:
+        if self.arrow and (self.arrow_count % STATE_DELAY) == int(STATE_DELAY / 2):
             # Remove the arrow after it's moved
+            print("Arrow removed")
             self.arrow = None
             self.arrow_count = None
 
@@ -145,8 +153,6 @@ class Visualizer:
                 int(self.state[self.current_turn_index]["position"][0]) * config.GRID_SIZE + self.offset[1]
             ))
             self.arrow_count += 1
-            if self.arrow_count == STATE_DELAY:
-                self.arrow = None
 
         self.sidebar.draw(self.screen, self.get_current_turn(), move_log=self.current_turn_index >= 14)
         self.move_log = False
