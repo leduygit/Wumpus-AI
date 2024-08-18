@@ -27,13 +27,17 @@ class DummyAgent(BaseAgent):
         if is_pit == True:
             return False
         
-        if is_poison_gas == True and self.get_health() <= 50:
+        
+        if is_poison_gas != False and self.get_health() < 50:
             return False
+        
+        # if is_poison_gas != True and self.get_health() < 50:
+        #     return False
 
-        if is_poison_gas == True and self.get_health() > 50:
+        if is_poison_gas != False and self.get_health() >= 50:
             return True
         
-        if is_pit == False and is_wumpus == False:
+        if is_pit == False and is_wumpus == False and (self.get_health() >= 50 or is_poison_gas == False):
             return True
         
         
@@ -42,7 +46,6 @@ class DummyAgent(BaseAgent):
     def add_safe_cell(self):
         for i in range(self.height):
             for j in range(self.width):
-                if not self.safe_cells[i][j]:
                     self.safe_cells[i][j] = self.is_safe((i, j))
 
         for i in range(self.height):

@@ -5,7 +5,7 @@ INPUT_PATH = IO_PATH + 'input/'
 OUTPUT_PATH = IO_PATH + 'JSON/'
 
 FILE_NAME = [
-            'map1',
+            'map',
             'map2',
             'map3',
             'map4',
