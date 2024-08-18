@@ -20,6 +20,10 @@ class DummyAgent(BaseAgent):
         is_pit = self.solve_assumption([pit(i, j)])
         is_poison_gas = self.solve_assumption([poison_gas(i, j)])
 
+        if (self.get_health() <= 50):
+            if is_poison_gas != False or is_wumpus != False or is_pit != False:
+                return False
+
 
         if is_wumpus == True:
             return False
@@ -42,7 +46,6 @@ class DummyAgent(BaseAgent):
     def add_safe_cell(self):
         for i in range(self.height):
             for j in range(self.width):
-                if not self.safe_cells[i][j]:
                     self.safe_cells[i][j] = self.is_safe((i, j))
 
         for i in range(self.height):
@@ -68,7 +71,7 @@ class DummyAgent(BaseAgent):
 
             i, j = position
 
-            if not self.is_safe((i, j)) and (i, j) != self.get_position():
+            if not self.safe_cells[i][j] and (i, j) != self.get_position():
                 continue
 
             if (i, j) in goal:
