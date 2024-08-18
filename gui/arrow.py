@@ -21,13 +21,13 @@ class Arrow:
 
     def draw(self, screen, current_frame, position):
         if self.direction == "L":
-            delta = (- current_frame * self.grid_size / config.STATE_DELAY, 0) # 30 is STATE_DELAY
+            delta = (- current_frame * self.grid_size / config.STATE_DELAY * 2, 0) # 30 is STATE_DELAY
         elif self.direction == "U":
-            delta = (0, -current_frame * self.grid_size / config.STATE_DELAY)
+            delta = (0, -current_frame * self.grid_size / config.STATE_DELAY * 2)
         elif self.direction == "D":
-            delta = (0, current_frame * self.grid_size / config.STATE_DELAY)
+            delta = (0, current_frame * self.grid_size / config.STATE_DELAY * 2)
         else:
-            delta = (current_frame * self.grid_size / config.STATE_DELAY, 0)
+            delta = (current_frame * self.grid_size / config.STATE_DELAY * 2, 0)
         position = (position[0] + delta[0] + self.grid_size / 4, position[1] + delta[1] + self.grid_size / 4)
         # Note: The arrow is drawn at the center of the cell as the position is the top-left corner (the image had been scaled down by 2)
         screen.blit(self.arrow_image, position)
