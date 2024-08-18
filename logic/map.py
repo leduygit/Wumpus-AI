@@ -14,13 +14,11 @@ class Map:
         self.height = len(grid)
         self.wumpus_scream = False
 
-        print(grid)
 
         # update information about stench, breeze, and gold
         for i in range(self.height):
             for j in range(self.width):
                 percept = grid[i][j]
-                print(i, j)
                 if type(percept) == str:
                     percept = [percept]
 

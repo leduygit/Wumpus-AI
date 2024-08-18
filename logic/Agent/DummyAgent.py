@@ -155,12 +155,7 @@ class DummyAgent(BaseAgent):
         if self.action_sequence:
             action = self.action_sequence.pop(0)
             return action
-
-        
-        # find cell with stench and go there
-        print("Health: ", self.get_health())
-            
-                    
+       
         # go back to start
         return self.return_to_start()
                     

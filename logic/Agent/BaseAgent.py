@@ -146,7 +146,6 @@ class BaseAgent:
 
     def add_percept(self, position, percept):
         i, j = position
-        print("Current Percept: ", percept)
         
         if isinstance(percept, str):
             percept = [percept]

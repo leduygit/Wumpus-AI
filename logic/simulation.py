@@ -35,12 +35,12 @@ def load_map(file):
 
 
 def simulate():
-
+    print("-" * 50)
     for file in CONFIG.FILE_NAME:
-
         input_file = CONFIG.INPUT_PATH + file + '.txt'
         output_file = CONFIG.OUTPUT_PATH + file + '.json'
         print(f"Simulating {file}...")
+        print(f"Running simulation on \"{input_file}\" and writing to \"{output_file}\"")
         grid = load_map(input_file)
         height = len(grid)
         width = len(grid[0])
@@ -53,6 +53,12 @@ def simulate():
         env.simulate()
 
         env.write_to_file(output_file)
+
+        print(f"Simulation for {file} complete.")
+        
+        print('-' * 50)
+
+    print("All simulations complete.")
 
     
 
