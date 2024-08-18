@@ -44,6 +44,11 @@ class DummyAgent(BaseAgent):
             for j in range(self.width):
                 if not self.safe_cells[i][j]:
                     self.safe_cells[i][j] = self.is_safe((i, j))
+
+        for i in range(self.height):
+            for j in range(self.width):
+                is_wumpus = self.solve_assumption([wumpus(i, j)])
+                self.is_wumpus[i][j] = is_wumpus
                 
 
     def bfs_to_nearest_safe(self):
@@ -63,7 +68,7 @@ class DummyAgent(BaseAgent):
 
             i, j = position
 
-            if not self.is_safe((i, j)) and (i, j) != self.get_position():
+            if not self.safe_cells[i][j] and (i, j) != self.get_position():
                 continue
 
             if (i, j) in goal:
@@ -107,9 +112,6 @@ class DummyAgent(BaseAgent):
 
     def make_action(self):
 
-        if self.get_health() < 100 and self.get_potion() > 0:
-            return "Heal"
-
         current_percept = self.get_percept(self.get_position())
 
         if self.get_health() < 100 and self.get_potion() > 0:
@@ -121,20 +123,8 @@ class DummyAgent(BaseAgent):
         if 'H_P' in current_percept:
             return "Grab"
 
-        # if there is no None inn safe cell and no unvisited cell --> go back to the start
-        if not any(None in row for row in self.safe_cells) and not any(False in row for row in self.visited):
-            return self.return_to_start()
-
-
         self.add_safe_cell()
-
-        self.action_sequence = self.bfs_to_nearest_safe()
-
-        if self.action_sequence:
-            action = self.action_sequence.pop(0)
-            return action
         
-            
         if 'S' in current_percept:
             direction = self.get_direction()
             i, j = self.get_position()
@@ -143,35 +133,52 @@ class DummyAgent(BaseAgent):
             u, v = i + FORWARD[index][0], j + FORWARD[index][1]
 
 
-            if self.is_valid_move(u, v) and self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
+            if self.is_valid_move(u, v) and self.is_wumpus[u][v] != False:
                 return "Shoot"
             else:
                 # check if on the right not safe cell and not shooted
                 index = (index + 1) % 4
                 u, v = i + FORWARD[index][0], j + FORWARD[index][1]
-                if self.is_valid_move(u, v) and self.safe_cells[u][v] != True and not self.get_shooted((u, v)):
+                if self.is_valid_move(u, v) and self.is_wumpus[u][v] != False:
                     return "Turn Right"
                 return "Turn Left"
             
-        # find cell with stench and go there
-        print("Health: ", self.get_health())
-            
         
-        stench_list = []
+        # if there is no None inn safe cell and no unvisited cell --> go back to the start
+        if not any(None in row for row in self.safe_cells) and not any(False in row for row in self.visited):
+            action = self.return_to_start()
+            if action:
+                return action
+            
+            # if the agent can't go back to the start, just go
+            for i in range(self.height):
+                for j in range(self.width):
+                    self.safe_cells[i][j] = True
+
+            return self.return_to_start()
+
+
+
+        self.action_sequence = self.bfs_to_nearest_safe()
+
+        if self.action_sequence:
+            action = self.action_sequence.pop(0)
+            return action
+       
+        # go back to start
+        
+        # check if the agent could go back to the start
+        last_action = self.return_to_start()   
+        if last_action:
+            return last_action
+        
+        # if the agent can't go back to the start, just go
+
+        # make all the cells safe
         for i in range(self.height):
             for j in range(self.width):
-                if 'S' in self.grid[i][j]:
-                    stench_list.append((i, j))
-                    
+                self.safe_cells[i][j] = True
 
-        if stench_list:
-            self.action_sequence = self.bfs_to_goal(stench_list)
-            if self.action_sequence:
-                action = self.action_sequence.pop(0)
-                return action
-                    
-        
-        # go back to start
         return self.return_to_start()
                     
         

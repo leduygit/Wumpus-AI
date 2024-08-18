@@ -47,7 +47,7 @@ class BaseAgent:
         self.potion = 0
         self.visited = [[False for _ in range(width)] for _ in range(height)]
         self.kb = CNF()
-        self.shooted = [[False for _ in range(width)] for _ in range(height)]
+        self.is_wumpus = [[False for _ in range(width)] for _ in range(height)]
 
         self.PERCEPT_TO_FUNCTION = {
             'W': wumpus,
@@ -118,13 +118,13 @@ class BaseAgent:
     def set_direction(self, direction):
         self.direction = direction
 
-    def get_shooted(self, position):
+    def get_is_wumpus(self, position):
         i, j = position
-        return self.shooted[i][j]
+        return self.is_wumpus[i][j]
     
-    def set_shooted(self, position):
+    def set_is_wumpus(self, position, is_wumpus):
         i, j = position
-        self.shooted[i][j] = True
+        self.is_wumpus[i][j] = is_wumpus
 
     def simplify(self):
         new_kb = CNF()
@@ -138,7 +138,7 @@ class BaseAgent:
                 for c in clause:
                     if [-c] not in self.kb.clauses:
                         new_clause.append(c)
-                if new_clause not in new_kb:
+                if new_clause not in new_kb and len(new_clause) > 0:
                     new_kb.append(new_clause)
         
         self.kb = new_kb
@@ -146,7 +146,6 @@ class BaseAgent:
 
     def add_percept(self, position, percept):
         i, j = position
-        print("Current Percept: ", percept)
         
         if isinstance(percept, str):
             percept = [percept]
@@ -160,13 +159,13 @@ class BaseAgent:
             if [wumpus(i, j)] in self.kb.clauses:
                 self.kb.clauses.remove([wumpus(i, j)])
             self.kb.append([-wumpus(i, j)])
+            # self.kb.append([-pit(i, j)])  
             self.simplify()
             return
 
-        if 'Sc' in percept:            
-            if [wumpus(i, j)] in self.kb.clauses:
-                self.kb.clauses.remove([wumpus(i, j)])
-            self.kb.append([-wumpus(i, j)])
+        if 'Sc' in percept:
+            if [pit(i, j)] in self.kb.clauses:
+                self.kb.clauses.remove([pit(i, j)])            
             self.kb.append([-pit(i, j)])
             self.simplify()
             return
@@ -236,6 +235,8 @@ class BaseAgent:
         solver = pysat.solvers.Solver(name='glucose3', bootstrap_with=self.kb.clauses)
         positive_model = solver.solve(assumptions=assumption)
         negative_model = solver.solve(assumptions=[-a for a in assumption])
+
+        # print("KB: ", self.kb.clauses)
 
         if not positive_model and not negative_model:
             raise ValueError('Invalid assumption')

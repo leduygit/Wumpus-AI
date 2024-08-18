@@ -28,10 +28,7 @@ class Environment:
                 if value in current_cell:
                     threat = value
                     break
-            if threat == 'W':
-                print('Agent is eaten by Wumpus')
-            else:
-                print('Agent falls into the pit')
+
             self.formatter.set_log('Game Over, Agent Die')
             return True
 
@@ -60,6 +57,7 @@ class Environment:
                 if self.agent.is_valid_move(x, y):
                     if actuator in self.map.get_percept((x, y)):
                         return # do not remove the percept if there is an actuator nearby
+            
 
         self.map.remove_percept((i, j), percept)
         self.agent.remove_percept((i, j), percept)
@@ -114,13 +112,13 @@ class Environment:
         if 'G' in current_cell:
             self.remove_percept((i, j), 'G')
             self.agent.set_score(self.agent.get_score() + 5000)
-            print('Gold is grabbed')
+            # print('Gold is grabbed')
             self.formatter.set_log('Grab Gold')
         elif 'H_P' in current_cell:
             self.agent.set_potion(self.agent.get_potion() + 1)
             self.remove_percept((i, j), 'H_P')  # Removing the potion percept
             self.remove_nearby_percept(i, j, 'G_L')  # Removing the glow percept
-            print('Potion is grabbed')
+            # print('Potion is grabbed')
         else:
             raise ValueError('No gold or potion to grab')
 
@@ -131,21 +129,19 @@ class Environment:
         di, dj = self.direction_to_delta(DIRECTION[id])
 
         if self.agent.is_valid_move(i + di, j + dj):
-            self.agent.set_shooted((i + di, j + dj))
+            # self.agent.set_shooted((i + di, j + dj))
             if 'W' in self.map.get_percept((i + di, j + dj)):
                 self.remove_percept((i + di, j + dj), 'W')
                 self.agent.add_percept((i + di, j + dj), 'Sc')
                 self.map.set_wumpus_scream(True)
                 self.remove_nearby_percept(i + di, j + dj, 'S')  # Removing the stench percept
-                print('Wumpus is killed')
             else:
-                print('No Wumpus to kill')
                 self.agent.add_percept((i + di, j + dj), 'No-Sc')  # indicate that there's no wumpus
 
     def climb(self):
         """Climb out of the cave if the agent is in the bottom-left corner."""
         if self.agent.get_position() == (self.map.get_height() - 1, 0):
-            print('Agent has climbed')
+            # print('Agent has climbed')
             self.game_over = True
         else:
             raise ValueError('Agent cannot climb')
@@ -184,7 +180,7 @@ class Environment:
         i, j = self.agent.get_position()
         if "P_G" in self.map.get_percept((i, j)):
             self.agent.set_health(self.agent.get_health() - 25)
-            print('Agent is poisoned')
+            # print('Agent is poisoned')
 
     def remove_nearby_percept(self, i, j, percept):
         """Remove the specified percept from the neighboring cells."""
