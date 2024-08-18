@@ -68,7 +68,7 @@ class DummyAgent(BaseAgent):
 
             i, j = position
 
-            if not self.is_safe((i, j)) and (i, j) != self.get_position():
+            if not self.safe_cells[i][j] and (i, j) != self.get_position():
                 continue
 
             if (i, j) in goal:
@@ -146,6 +146,15 @@ class DummyAgent(BaseAgent):
         
         # if there is no None inn safe cell and no unvisited cell --> go back to the start
         if not any(None in row for row in self.safe_cells) and not any(False in row for row in self.visited):
+            action = self.return_to_start()
+            if action:
+                return action
+            
+            # if the agent can't go back to the start, just go
+            for i in range(self.height):
+                for j in range(self.width):
+                    self.safe_cells[i][j] = True
+
             return self.return_to_start()
 
 
@@ -157,6 +166,19 @@ class DummyAgent(BaseAgent):
             return action
        
         # go back to start
+        
+        # check if the agent could go back to the start
+        last_action = self.return_to_start()   
+        if last_action:
+            return last_action
+        
+        # if the agent can't go back to the start, just go
+
+        # make all the cells safe
+        for i in range(self.height):
+            for j in range(self.width):
+                self.safe_cells[i][j] = True
+
         return self.return_to_start()
                     
         
