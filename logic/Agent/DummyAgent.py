@@ -27,17 +27,13 @@ class DummyAgent(BaseAgent):
         if is_pit == True:
             return False
         
-        
-        if is_poison_gas != False and self.get_health() < 50:
+        if is_poison_gas == True and self.get_health() <= 50:
             return False
-        
-        # if is_poison_gas != True and self.get_health() < 50:
-        #     return False
 
-        if is_poison_gas != False and self.get_health() >= 50:
+        if is_poison_gas == True and self.get_health() > 50:
             return True
         
-        if is_pit == False and is_wumpus == False and (self.get_health() >= 50 or is_poison_gas == False):
+        if is_pit == False and is_wumpus == False:
             return True
         
         
@@ -46,6 +42,7 @@ class DummyAgent(BaseAgent):
     def add_safe_cell(self):
         for i in range(self.height):
             for j in range(self.width):
+                if not self.safe_cells[i][j]:
                     self.safe_cells[i][j] = self.is_safe((i, j))
 
         for i in range(self.height):
@@ -113,8 +110,7 @@ class DummyAgent(BaseAgent):
             action = self.action_sequence.pop(0)
             return action
         
-        # just go back to start
-        # make all cell safe
+        # if there is no path to the start make all cell safe
         for i in range(self.height):
             for j in range(self.width):
                 self.safe_cells[i][j] = True
