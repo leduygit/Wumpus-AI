@@ -48,6 +48,7 @@ class BaseAgent:
         self.visited = [[False for _ in range(width)] for _ in range(height)]
         self.kb = CNF()
         self.is_wumpus = [[False for _ in range(width)] for _ in range(height)]
+        self.is_poison_gas = [[False for _ in range(width)] for _ in range(height)]
 
         self.PERCEPT_TO_FUNCTION = {
             'W': wumpus,

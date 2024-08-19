@@ -11,6 +11,7 @@ class DummyAgent(BaseAgent):
         self.safe_cells = [[None for _ in range(width)] for _ in range(height)] 
         self.width = width
         self.height = height
+        self.cannot_go_back = False
         
 
     def is_safe(self, position):
@@ -52,6 +53,11 @@ class DummyAgent(BaseAgent):
             for j in range(self.width):
                 is_wumpus = self.solve_assumption([wumpus(i, j)])
                 self.is_wumpus[i][j] = is_wumpus
+        
+        for i in range(self.height):
+            for j in range(self.width):
+                is_poison_gas = self.solve_assumption([poison_gas(i, j)])
+                self.is_poison_gas[i][j] = is_poison_gas
                 
 
     def bfs_to_nearest_safe(self):
@@ -62,12 +68,12 @@ class DummyAgent(BaseAgent):
     def bfs_to_goal(self, goal):
         visited = [[[False for _ in range(self.width)] for _ in range(self.height)] for _ in range(4)]
 
-        queue = deque([(self.get_position(), self.get_direction(), [])])
+        queue = deque([(self.get_position(), self.get_health(), self.get_direction(), [])])
 
         action = ['Forward', 'Turn Left', 'Turn Right']
 
         while queue:
-            position, direction, action_sequence = queue.popleft()
+            position, health, direction, action_sequence = queue.popleft()
 
             i, j = position
 
@@ -82,21 +88,28 @@ class DummyAgent(BaseAgent):
 
             visited[DIRECTION.index(direction)][i][j] = True
 
+            if self.cannot_go_back == False and health <= 0:
+                continue
+
+
             for a in action:
                 direction_index = DIRECTION.index(direction)
 
                 if a == 'Forward':
                     new_position = (i + FORWARD[direction_index][0], j + FORWARD[direction_index][1])
                     if self.is_valid_move(new_position[0], new_position[1]):
-                        queue.append((new_position, direction, action_sequence + ['Forward']))
+                        new_health = health
+                        if self.is_poison_gas[new_position[0]][new_position[1]] == True:
+                            new_health = health - 25
+                        queue.append((new_position, new_health, direction, action_sequence + ['Forward']))
 
                 elif a == 'Turn Left':
                     new_direction = DIRECTION[(direction_index - 1) + 4 % 4]
-                    queue.append((position, new_direction, action_sequence + ['Turn Left']))
+                    queue.append((position, health, new_direction, action_sequence + ['Turn Left']))
 
                 elif a == 'Turn Right':
                     new_direction = DIRECTION[(direction_index + 1) % 4]
-                    queue.append((position, new_direction, action_sequence + ['Turn Right']))
+                    queue.append((position, health, new_direction, action_sequence + ['Turn Right']))
 
         return []
 
@@ -113,14 +126,30 @@ class DummyAgent(BaseAgent):
             action = self.action_sequence.pop(0)
             return action
         
+        # push all dangerous cell to a goal
+        goal_list = [(self.height - 1, 0)]
+
+        for i in range(self.height):
+            for j in range(self.width):
+                if not self.safe_cells[i][j]:
+                    goal_list.append((i, j))
+        
         # if there is no path to the start make all cell safe
         for i in range(self.height):
             for j in range(self.width):
                 self.safe_cells[i][j] = True
 
         self.action_sequence = self.bfs_to_goal([(self.height - 1, 0)])
+        if self.action_sequence:
+            action = self.action_sequence.pop(0)
+            return action
+        
+        self.cannot_go_back = True
+        self.action_sequence = self.bfs_to_goal(goal_list)
         action = self.action_sequence.pop(0)
         return action
+        
+
 
     def make_action(self):
 
